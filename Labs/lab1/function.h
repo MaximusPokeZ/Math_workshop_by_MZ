@@ -9,22 +9,94 @@
 #include <stdbool.h>
 #include <limits.h>
 
+// <-a>
+long long sum_of_natural_numbers(long long number)
+{
+    long long sum = number * (number + 1) / 2;
+    return sum;
+}
+//-----------------------
 
-// Print prime <-p>
-bool is_prime(int number) {
-    if (number <= 1) {
-        return false;
+
+
+bool is_negative(char* number)
+{
+    if (number[0] == '-')
+    {
+        return true;
     }
-    for (int divisor = 2; divisor * divisor <= number; divisor++) {
-        if (number % divisor == 0) {
-            return false;
-        }
-    }
-    return true;
+    return false;
 }
 
+
+
+//divide digits <-s>
+void print_digits(const unsigned char* array)
+{
+    printf("Divide a number into digits: ");
+    while (*array != '\0')
+    {
+        printf("%c ", *array);
+        array++;
+    }
+    printf("\n");
+}
+
+
+void divide_to_digits (char* number, unsigned char *** array)
+{
+    **array = (unsigned char * )malloc(sizeof(unsigned char) * RANGE);
+    int i = 0;
+    if (is_negative(number))
+    {
+        (**array)[i] = *number;
+        number++;
+        i++;
+    }
+    if (*(number + 1) == '\0')
+    {
+        (**array)[i] = *number;
+        (**array)[++i] = '\0';
+        return;
+    }
+    while (*number == '0') 
+    {
+        number++;
+    }
+    while (*number != '\0')
+    {
+        (**array)[i] = *number;
+        number++;
+        i++;
+    }
+    (**array)[i] = '\0';
+}
+//---------------------------------------------------------------
+
+
+// Print prime <-p>
+enum prime_status_code
+{
+    prime,
+    not_prime
+};
+
+
+enum prime_status_code is_prime(const long long * number) {
+    if (*number <= 1) {
+        return not_prime;
+    }
+    for (int divisor = 2; divisor * divisor <= *number; divisor++) {
+        if (*number % divisor == 0) {
+            return not_prime;
+        }
+    }
+    return prime;
+}
+//------------------------------------------------------
+
 // Print multiples <-h>
-void print_multiples(int number, unsigned char * array)
+void print_multiples(const int number, const unsigned char * array)
 {
     printf("Numbers that are multiples of %d:\n", number);
     for (int i = number; i <= RANGE; i += number)

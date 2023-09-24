@@ -9,6 +9,8 @@ enum digit_check_status_codes
     not_digit
 };
 
+
+
 enum digit_check_status_codes is_digit(const char *str, long long *value_from_string) {
     char *endptr;
     *value_from_string = strtoll(str, &endptr, 10); 
@@ -28,20 +30,13 @@ enum digit_check_status_codes is_digit(const char *str, long long *value_from_st
     return not_digit;
 }
 
-bool is_negative(char* number)
-{
-    if (number[0] == '-')
-    {
-        return true;
-    }
-    return false;
-}
 
-bool is_negative_null(char ** number)
+
+bool is_negative_null(char ** str_number, long long number)
 {
-    if (is_negative(*number) && *number[1] == '0')
+    if (is_negative(*str_number) && number == 0)
     {
-        number++;
+        *str_number = "0";
         return true;
     }
     return false;
@@ -124,15 +119,15 @@ enum input_check_status_codes Input_checker(int argc, char* argv[], long long * 
     return invalid_input;
 } 
 
-void use_flag(long long * number, char ** str_number, char flag, unsigned char ** array_of_multiples)
+void use_flag(long long * number, char ** str_number, char flag, unsigned char ** array_for)
 {
     switch (flag) 
         {
         case 'h':
-            switch(find_multiples(*number, &array_of_multiples))
+            switch(find_multiples(*number, &array_for))
             {
                 case has_multiples:
-                    print_multiples(*number, *array_of_multiples);
+                    print_multiples(*number, *array_for);
                     break;
                 case not_multiples:
                     printf("The number %lld has no multiples\n", *number);
@@ -140,20 +135,23 @@ void use_flag(long long * number, char ** str_number, char flag, unsigned char *
             }
             break;
         case 'p':
-            if (is_prime(*number)) 
+            switch(is_prime(number)) 
             {
-                printf("%s is prime number\n", *str_number);
-            } else 
-            {
-                printf("%s is composite number\n", *str_number);
-            }
+                case prime:
+                    printf("%s is prime number\n", *str_number);
+                    break;
+                case not_prime:
+                    printf("%s is composite number\n", *str_number);
+                    break;
+            } 
+        break;
+        case 's':
+            divide_to_digits(*str_number, &array_for);
+            print_digits(*array_for);
             break;
-        // case 's':
-        //     print_digits(number);
-        //     break;
-        // case 'a':
-        //     printf("Sum of natural numbers from 1 to %s is %d\n", number, sum_of_natural_numbers(atoi(number)));
-        //     break;
+        case 'a':
+            printf("Sum of natural numbers from 1 to %s is %d\n", str_number, sum_of_natural_numbers(number));
+            break;
         // case 'f':
         //     unsigned long result;
         //     switch(factorial(number, &result))
@@ -235,13 +233,12 @@ int main(int argc, char* argv[])
         return 1;
     case true_input:
         printf("True input\n");
+        is_negative_null(&str_number, number);
         use_flag(&number, &str_number, flag, &array);
         break;
     }
 
-    is_negative_null(&str_number);
     printf("\n\n%lld\n", number);
-    printf("\n\n%lld\n", LLONG_MAX);
     printf("%s\n", str_number);
     printf("%c\n", flag);
 
