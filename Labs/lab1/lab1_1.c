@@ -2,16 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <limits.h>
 
 
-bool is_digit(char* number)
-{
-    if (((number[0] >= '0') && (number[0] <= '9')) || (number[0] == '-' && ((number[1] >= '0') && (number[1] <= '9'))))
+bool is_digit(const char *str, unsigned long *value_from_string) {
+    char *endptr;
+    *value_from_string = strtoul(str, &endptr, 10); 
+    if (*str != '\0' && *endptr == '\0')
     {
         return true;
     }
+    value_from_string = NULL;
     return false;
-    
 }
 
 bool is_negative(char* number)
@@ -93,9 +95,39 @@ int sum_of_natural_numbers(int number)
     return sum;
 }
 
-int factorial(int number)
+enum factorial_status_codes
 {
-    return (number < 2) ? 1 : number * factorial(number - 1);
+    fsc_ok,
+    fsc_overflow,
+    fsc_invalid_parameter
+};
+
+enum factorial_status_codes factorial(unsigned int number, unsigned long * result)
+{
+    enum factorial_status_codes recursive_status_code; 
+    if (number > 22) 
+    { 
+        return fsc_invalid_parameter; 
+    } 
+
+    if (number == 0 || number == 1)
+    {
+        *result = 1;
+        return fsc_ok;
+    }
+
+    recursive_status_code = factorial(number - 1, result);
+
+    if (recursive_status_code == fsc_ok)
+    {
+                
+        if (*result > ULONG_MAX / number) {
+            return fsc_overflow;
+        }
+        *result *= number;
+    }
+
+    return recursive_status_code;
 }
 
 void table_of_degrees(char * number)
@@ -120,6 +152,66 @@ void table_of_degrees(char * number)
     }
 }
 
+enum flag_check_status_codes
+{
+    invalid_flag,
+    undefined_flag,
+    true_flag
+};
+
+enum flag_check_status_codes flag_checker(char* flag)
+{
+    if (flag[0] != '-')
+    {
+        return invalid_flag;
+    }
+    else if (flag[1] != 'h' || flag[1] != 'p' || 
+                        flag[1] != 's' || flag[1] != 'e' ||
+                                flag[1] != 'a' || flag[1] != 'f')
+    {
+        return undefined_flag;
+    }
+    return true_flag;
+}
+
+enum input_check_status_codes
+{
+    invalid_input, 
+    invalid_input_flag, 
+    undefined_input_flag,
+    info_input_help,
+    info_input,
+    true_input
+};
+
+enum input_check_status_codes Input_checker(int argc, char* argv[], unsigned long * number)
+{
+    if (argc != 3)
+    {
+        if (argc == 2 && !(strcmp(argv[1], "-help"))) {
+            return info_input_help;
+        }
+        else if (argc == 2 && !(strcmp(argv[1], "-info"))) {
+            return info_input;
+        }
+        return invalid_input;
+    }
+    if (is_digit(argv[1], number))
+    {
+        switch(flag_checker(argv[2]))
+        {
+            case invalid_flag:
+                return invalid_input_flag;
+            case undefined_flag:
+                return undefined_input_flag;
+            case true_flag:
+                return true_input;
+        }
+    }
+    return invalid_input;
+} 
+
+
 
 void print_help() {
     printf("Choose an action:\n");
@@ -133,77 +225,87 @@ void print_help() {
 
 void print_info() {
     printf("\nCreated by Maxim Zaslavtsev\n");
+    printf("\nM8O-211Б-22\n");
     printf("Laboratory work #1_1\n\n");
 }
 
 int main(int argc, char* argv[])
 {
 
-    if (argc != 3)
+    unsigned long number;
+
+    switch (Input_checker(argc, argv, &number))
     {
-        if (argc == 2 && !(strcmp(argv[1], "-help"))) {
-            print_help();
-            return 0;
-        }
-        else if (argc == 2 && !(strcmp(argv[1], "-info"))) {
-            print_info();
-            return 0;
-        }
+    case invalid_input:
         printf("\nInvalid input\n");
         printf("Use: %s <number> <flag> (use %s -help to list all functions)\n\n", argv[0], argv[0]);
         return 1;
-    }
-
-    char* number = argv[1];
-    char flag = argv[2][1];
-
-    if (is_digit(number))
-    {
-        if (is_negative(number) && number[1] == '0' && number[2] == '\0')
-        {
-            number = "0";
-        }
-    }
-    else
-    {
-        printf("Incorrect number entry\n");
+    case info_input:
+        print_info();
+        break;
+    case info_input_help:
+        print_help();
+        break;
+    case invalid_input_flag:
+        printf("Invalid flag\n");
         return 1;
+    case undefined_input_flag:
+        printf("Undefined flag\n");
+        return 1;
+    case true_input:
+        printf("True input\n");
+        break;
     }
+    
 
-    switch (flag) 
-    {
-    case 'h':
-        print_multiples(atoi(number));
-        break;
-    case 'p':
-        if (is_prime(atoi(number))) 
-        {
-            printf("%s is prime number\n", number);
-        } else 
-        {
-            printf("%s is composite number\n", number);
-        }
-        break;
-    case 's':
-        print_digits(number);
-        break;
-    case 'a':
-        printf("Sum of natural numbers from 1 to %s is %d\n", number, sum_of_natural_numbers(atoi(number)));
-        break;
-    case 'f':
-        if (*number != '-') {
-            printf("Factorial of %s is %d\n", number, factorial(atoi(number)));
-        } else {
-            printf("Factorial for positive numbers only\n");
-        }
-        break;
-    case 'e':
-        table_of_degrees(number);
-        break;
-    default:
-        printf("Invalid flag: %c\n", flag);
-        break;
-}
+    // char* str_number = argv[1];
+    // char flag = argv[2][1];
+    // unsigned long result;
+
+    //printf("%lu\n", number);
+
+
+//     switch (flag) 
+//     {
+//     case 'h':
+//         print_multiples(atoi(number));
+//         break;
+//     case 'p':
+//         if (is_prime(atoi(number))) 
+//         {
+//             printf("%s is prime number\n", number);
+//         } else 
+//         {
+//             printf("%s is composite number\n", number);
+//         }
+//         break;
+//     case 's':
+//         print_digits(number);
+//         break;
+//     case 'a':
+//         printf("Sum of natural numbers from 1 to %s is %d\n", number, sum_of_natural_numbers(atoi(number)));
+//         break;
+//     case 'f':
+//         switch(factorial(atoi(number), &result))
+//         {
+//             case fsc_ok: 
+//                 printf("%s! = %lu\n", number, result); 
+//                 break; 
+//             case fsc_overflow: 
+//                 printf("Overflow detected!!1!1"); 
+//                 break; 
+//             case fsc_invalid_parameter: 
+//                 printf("Invalid parameter detected!!1!1"); 
+//                 break; 
+//         }
+//         break;
+//     case 'e':
+//         table_of_degrees(number);
+//         break;
+//     default:
+//         printf("Invalid flag: %c\n", flag);
+//         break;
+// }
 
 return 0;
 
