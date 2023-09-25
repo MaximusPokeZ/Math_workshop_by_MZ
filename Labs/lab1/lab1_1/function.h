@@ -284,7 +284,7 @@ enum multiples_status_codes find_multiples(int divisor, unsigned char *** array_
     return has_multiples;
 }
 
-void print_multiples(enum multiples_status_codes status, const int number, const unsigned char * array)
+void print_multiples(enum multiples_status_codes status, const int number, unsigned char * array)
 {
     switch (status)
     {
@@ -300,6 +300,8 @@ void print_multiples(enum multiples_status_codes status, const int number, const
             printf("\n");
             break;
     }
+    free(array);
+    array = NULL; 
     
 }
 //-------------------------------------------------
@@ -307,13 +309,6 @@ void print_multiples(enum multiples_status_codes status, const int number, const
 
 
 //<-e>
-unsigned long power(int base, int degree) {
-    unsigned long result = 1;
-    for (int i = 0; i < degree; i++) {
-        result *= base;
-    }
-    return result;
-}
 
 void table_of_degrees(const int to_this_degree)
 {
@@ -321,10 +316,12 @@ void table_of_degrees(const int to_this_degree)
     {
         printf("Table of powers for bases from 1 to 10, degree range: 1 to %d", to_this_degree);
         for (int base = 1; base <= 10; base++) {
+            long current_base = (long)(base);
             printf("\n\nFor base %d:\t", base);
             for (int degree = 1; degree <= to_this_degree; degree++)
             {
-                printf("%d^%d = %lu; ", base, degree, power(base, degree));
+                printf("%d^%d = %lu; ", base, degree, current_base);
+                current_base *= base;
             }
         }
         printf("\n");

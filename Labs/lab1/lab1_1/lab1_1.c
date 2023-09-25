@@ -41,7 +41,6 @@ int main(int argc, char* argv[])
         break;
     }
 
-    free(array);
 
 return 0;
 
