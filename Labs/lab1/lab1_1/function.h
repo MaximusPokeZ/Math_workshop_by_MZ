@@ -1,5 +1,5 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef FUNCTION_H
+#define FUNCTION_H
 
 #define RANGE 100
 
