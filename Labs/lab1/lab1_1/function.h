@@ -343,6 +343,7 @@ void print_help() {
     printf("-a: Calculate the sum of natural numbers from 1 to the specified number.\n");
     printf("-f: Calculate the factorial of the specified number.\n");
     printf("-help: Display this help message.\n\n");
+    printf("-info: Display info message.\n\n");
 }
 
 void print_info() {

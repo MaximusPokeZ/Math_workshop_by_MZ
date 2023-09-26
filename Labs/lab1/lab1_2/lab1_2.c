@@ -1,21 +1,28 @@
-
+#include "functions.h"
 
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
+
+    long double epsilon;
+    char * str_epsilon;
+
+    switch(Input_checker(argc, argv, &epsilon, &str_epsilon))
     {
-        printf("\nInvalid input\n");
-        printf("Use: %s <epsilon>\n\n", argv[0]);
-        return 1;
-    }
+        case good_epsilon:
+            printf("Your epsilon: %9Lf\n", epsilon);
+            printf("The Euler's number:\n");
+            print_E(epsilon);
+            break;
+        case invalid_input:
+            return 1;
+    } 
 
 
-    long double epsilon = strtold(argv[1], NULL);
-    printf("%Lf\n\n", epsilon);
 
-    printf("The Euler's number:\n\n");
-    printf("By limit: %.10Lf\n", Euler_number_by_limit(epsilon));
+
+    // 
+    // 
 
 
 
