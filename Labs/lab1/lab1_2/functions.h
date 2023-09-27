@@ -153,14 +153,21 @@ enum input_check_status_codes Input_checker(int argc, char* argv[], long double 
     printf("Enter the second argument\n");
     return invalid_input;
 }
-
-
-
-
-
-
 //-------------------------------------
 
+
+
+// Newton's method for solving the equation f(x) = 0
+long double newton_Method(long double a, long double b, long double epsilon, long double (*function) (long double), long double (*dfunction) (long double)) {
+    long double x_0 = (a + b) / 2;
+    long double x_1 = x_0 - function(x_0) / dfunction(x_0);
+
+    while (fabsl(x_0 - x_1) > epsilon) {
+        x_0 = x_1;
+        x_1 = x_0 - function(x_0) / dfunction(x_0);
+    }
+    return x_1;
+}
 
 long double bpow(long double base, long long degree)
 {
@@ -192,7 +199,7 @@ long double Euler_number_by_limit (long double epsilon)
     return e;   
 }
 
-long double seriesEulerNumber(long double epsilon)
+long double series_Euler_Number(long double epsilon)
 {
     long double e = 1.0L;
     long double term = 1.0L;
@@ -211,12 +218,81 @@ long double seriesEulerNumber(long double epsilon)
     return e;
 }
 
+
+long double function_lnX_1(long double x) {
+    return log(x) - 1;
+}
+
+// Derivative of the function ln(x) - 1
+long double dfunction_ln(long double x) {
+    return 1.0 / x;
+}
+
+
 void print_E (long double epsilon)
 {
     printf("By limit: %.9Lf\n", Euler_number_by_limit(epsilon));
-    printf("By series: %.9Lf\n", seriesEulerNumber(epsilon));
-    printf("By 'math.h': %.9Lf\n", expl(1));
+    printf("By series: %.9Lf\n", series_Euler_Number(epsilon));
+    printf("By ln(x) = 1 && Newton's method: %.9Lf\n", newton_Method(1.0L, 3.0L, epsilon, &function_lnX_1, &dfunction_ln));
+    printf("By 'math.h' %.9Lf\n\n", expl(1));
 }
+//--------------------------------
+
+void multiplication_for_n_plus_one (long double * new_value, int n)
+{
+    *new_value = *new_value * ((4.0L * n * (n + 1)) / ((2.0L * n + 1) * (2.0L * n + 1)));
+}
+
+//for Pi
+long double Pi_number_by_limit (long double epsilon)
+{
+    
+    long double pi = 1.0L, factorial = 4.0L;
+    int n = 1;
+    while (fabsl(pi - factorial) > epsilon)
+    {
+        pi = factorial;
+        multiplication_for_n_plus_one(&factorial, n);
+        n++;
+    }
+    return pi;   
+}
+
+long double series_pi_Number(long double epsilon)
+{
+    long double pi = 1.0L;
+    long double term = 1.0L;
+    int n = 1;
+
+    while (fabsl(term) > epsilon)
+    {
+        n++;
+        term = pow(-1.0, n - 1) / (2 * n - 1);
+        pi += term;
+    }
+    pi *= 4;
+    return pi;
+}
+
+
+long double function_cosx_1(long double x) {
+    return cos(x) + 1;
+}
+
+// Derivative of the function cos(x) + 1
+long double dfunction_cos(long double x) {
+    return -sin(x);
+}
+
+
+void print_pi (long double epsilon)
+{
+    printf("By limit: %.9Lf\n", Pi_number_by_limit(epsilon));
+    printf("By series: %.9Lf\n", series_pi_Number(epsilon));
+    printf("By cos(x) = 1 && Newton's method: %.9Lf\n", newton_Method(1.0L, 5.0L, epsilon, &function_cosx_1, &dfunction_cos));
+    printf("By 'math.h' %.9f\n\n", M_PI);
+}
+//--------------------------------
 
 
 #endif
