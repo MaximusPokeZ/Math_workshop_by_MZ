@@ -15,16 +15,18 @@ int main(int argc, char* argv[])
             print_E(epsilon);
             printf("The PI number:\n");
             print_pi(epsilon);
+            printf("The ln(2) number:\n");
+            print_ln(epsilon);
+            printf("The sqrt(2) number:\n");
+            print_sqrt(epsilon);
+            printf("The Euler's constant number:\n");
+            print_gamma(epsilon);
             break;
         case invalid_input:
-            return 1;
+            printf("Invalid input\n");
+            break;
     } 
-
-
-
-
-    // 
-    // 
+ 
 
 
 

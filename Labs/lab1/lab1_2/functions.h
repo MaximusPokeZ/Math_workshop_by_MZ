@@ -10,31 +10,11 @@
 
 
 #define MIN_EPSILON 1e-9
+#define CONST_EULER_GAMMA 0.577215665
+
+long double precalculation_for_gamma;
 
 
-
-
-
-// enum digit_check_status_codes
-// {
-//     overflow,
-//     underflow,
-//     digit,
-//     not_digit,
-// };
-
-// enum digit_check_status_codes overflow_underflow_normal (const long double value)
-// {
-//     if (value >= LFONG_MAX)
-//     {
-//         return overflow;
-//     }
-//     else if (value <= LDBL_MIN)
-//     {
-//         return underflow;
-//     }
-//     return digit;
-// }
 
 //info print
 void print_help(const char * programm) {
@@ -262,13 +242,15 @@ long double series_pi_Number(long double epsilon)
 {
     long double pi = 1.0L;
     long double term = 1.0L;
+    long double sign = -1.0L;
     int n = 1;
 
     while (fabsl(term) > epsilon)
     {
         n++;
-        term = pow(-1.0, n - 1) / (2 * n - 1);
+        term = sign / (2 * n - 1);
         pi += term;
+        sign = -sign;
     }
     pi *= 4;
     return pi;
@@ -291,6 +273,181 @@ void print_pi (long double epsilon)
     printf("By series: %.9Lf\n", series_pi_Number(epsilon));
     printf("By cos(x) = 1 && Newton's method: %.9Lf\n", newton_Method(1.0L, 5.0L, epsilon, &function_cosx_1, &dfunction_cos));
     printf("By 'math.h' %.9f\n\n", M_PI);
+}
+//--------------------------------
+
+
+//for ln(2)
+long double ln_number_by_limit (long double epsilon)
+{
+    
+    long double ln2 = 0.0L, prev_ln2 = 0.0L;
+    int n = 1;
+    do
+    {
+        prev_ln2 = ln2;
+        ln2 = n * (pow(2, 1.0L / n) - 1);
+        n++;
+    }
+    while (fabsl(ln2 - prev_ln2) > epsilon);
+    return ln2;   
+}
+
+long double series_ln_Number(long double epsilon)
+{
+    long double ln = 0.0L;
+    long double term = 0.0L;
+    long double sign = 1.0L;
+    int n = 1;
+    do
+    {
+        term = sign / n;
+        ln += term;
+        n++;
+        sign = -sign;
+    }
+    while (fabsl(term) > epsilon);
+    return ln;
+}
+
+
+long double function_ex_2(long double x) {
+    return expl(x) - 2;
+}
+
+// Derivative of the function cos(x) + 1
+long double dfunction_ex(long double x) {
+    return expl(x);
+}
+
+
+void print_ln (long double epsilon)
+{
+    printf("By limit: %.9Lf\n", ln_number_by_limit(epsilon));
+    printf("By series: %.9Lf\n", series_ln_Number(epsilon));
+    printf("By e^x = 2 && Newton's method: %.9Lf\n", newton_Method(0.0L, 1.0L, epsilon, &function_ex_2, &dfunction_ex));
+    printf("By 'math.h' %.9f\n\n", log(2));
+}
+//--------------------------------
+
+
+//for sqrt(2)
+long double sqrt_number_by_limit (long double epsilon)
+{
+    
+    long double xn = -0.5L, prev_xn = 0.0L;
+    do
+    {
+        prev_xn = xn;
+        xn = xn - (xn * xn) * 0.5L + 1;
+    }
+    while (fabsl(prev_xn - xn) > epsilon);
+    return xn;   
+}
+
+long double Product_sqrt_Number(long double epsilon)
+{
+    long double result = 1.0L;
+    long double term = 2.0L;
+    long double term_degree = 0.5L;
+    do
+    {
+        term_degree = term_degree * 0.5L;
+        term = pow(2.0L, term_degree);
+        result *= term;
+    }
+    while (fabsl(term_degree) > epsilon);
+    return result;
+}
+
+
+long double function_x2_2(long double x) {
+    return x * x - 2;
+}
+
+// Derivative of the function cos(x) + 1
+long double dfunction_x2(long double x) {
+    return 2.0L * x;
+}
+
+
+void print_sqrt (long double epsilon)
+{
+    printf("By limit: %.9Lf\n", sqrt_number_by_limit(epsilon));
+    printf("By product: %.9Lf\n", Product_sqrt_Number(epsilon));
+    printf("By x^2 = 2 && Newton's method: %.9Lf\n", newton_Method(1.0L, 2.0L, epsilon, &function_x2_2, &dfunction_x2));
+    printf("By 'math.h' %.9f\n\n", sqrt(2));
+}
+//--------------------------------
+
+
+//for γ gamma
+long double gamma_number_by_limit (long double epsilon)
+{
+    
+    long double gamma = 0.0L, term = 0.0L;
+    int k = 1;
+    do
+    {
+        term = 1.0L / k;
+        gamma += term; 
+        k++;
+    }
+    while (fabsl(term) > epsilon);
+    return gamma - log(k);   
+}
+
+long double series_gamma_Number(long double epsilon)
+{
+    long double gamma = 0.0L;
+    long double term = 0.0L, prev_term = 0.0L;
+    int k = 2;
+    do
+    {
+        prev_term = term;
+        term = (1.0L / bpow(floorl(sqrt(k)), 2)) - (1.0L / k);
+        gamma += term;
+        k++;
+    }
+    while (fabsl(term - prev_term) > epsilon);
+    gamma = gamma - ((M_PI * M_PI) / 6.0L);
+    return gamma;
+}
+
+void precalculation_product (long double epsilon)
+{
+    precalculation_for_gamma = 1.0L; 
+    long double term = 1.0L, prev_term = 0.0L;
+    long double p = 2.0L;
+    do
+    {
+        prev_term = term;
+        term = (p - 1) / p;
+        precalculation_for_gamma *= term;
+        p++;
+    } while (fabsl(term - prev_term) > epsilon);
+    precalculation_for_gamma = precalculation_for_gamma * log(p);
+    printf("%Lf\n", precalculation_for_gamma);
+}
+
+
+long double function_e_gamma(long double x) {
+    return expl(-x) - precalculation_for_gamma;
+}
+
+// Derivative of the function cos(x) + 1
+long double dfunction_e_gamma(long double x) {
+    return -expl(-x);
+}
+
+
+void print_gamma (long double epsilon)
+{
+    printf("By limit: %.9Lf\n", gamma_number_by_limit(epsilon));
+    printf("By series: %.9Lf\n", series_gamma_Number(epsilon));
+    precalculation_product(epsilon);
+    printf("By e^-x = lim(ln(t)  П (p - 1) / p) && Newton's method: %.9Lf\n", newton_Method(0.0L, 1.0L, epsilon, &function_e_gamma, &dfunction_e_gamma));
+    printf("By 'math.h' %.9f\n\n", CONST_EULER_GAMMA);
 }
 //--------------------------------
 
