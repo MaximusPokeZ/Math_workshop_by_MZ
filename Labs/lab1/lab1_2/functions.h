@@ -16,6 +16,27 @@ long double precalculation_for_gamma;
 
 
 
+const long long MAX_N = 1e5;
+ 
+long long sieve_of_eratoshen[MAX_N + 1];
+ 
+void sieve()
+{
+    for (long long i = 2; i * i <= MAX_N; ++i)
+    {
+        if (sieve_of_eratoshen[i] > 0)
+        {
+            continue;
+        }
+        for (long long j = 2;  i * j <= MAX_N; ++j)
+        {
+            sieve_of_eratoshen[i * j] = 1;
+        }
+    }
+}
+
+
+
 //info print
 void print_help(const char * programm) {
 
@@ -414,20 +435,31 @@ long double series_gamma_Number(long double epsilon)
     return gamma;
 }
 
+long long Get_next_prime (long long p)
+{
+    p++;
+    while (sieve_of_eratoshen[p] != 0)
+    {
+        p++;
+    } 
+    return p;
+}
+
 void precalculation_product (long double epsilon)
 {
     precalculation_for_gamma = 1.0L; 
     long double term = 1.0L, prev_term = 0.0L;
-    long double p = 2.0L;
+    long long p = 1, t; 
     do
     {
+        p = Get_next_prime(p);
+        t = p;
         prev_term = term;
-        term = (p - 1) / p;
+        term = ((long double)p - 1) / (long double)p;
         precalculation_for_gamma *= term;
-        p++;
+        t++;
     } while (fabsl(term - prev_term) > epsilon);
-    precalculation_for_gamma = precalculation_for_gamma * log(p);
-    printf("%Lf\n", precalculation_for_gamma);
+    precalculation_for_gamma = precalculation_for_gamma * log(t);
 }
 
 
@@ -445,6 +477,7 @@ void print_gamma (long double epsilon)
 {
     printf("By limit: %.9Lf\n", gamma_number_by_limit(epsilon));
     printf("By series: %.9Lf\n", series_gamma_Number(epsilon));
+    sieve();
     precalculation_product(epsilon);
     printf("By e^-x = lim(ln(t)  П (p - 1) / p) && Newton's method: %.9Lf\n", newton_Method(0.0L, 1.0L, epsilon, &function_e_gamma, &dfunction_e_gamma));
     printf("By 'math.h' %.9f\n\n", CONST_EULER_GAMMA);
