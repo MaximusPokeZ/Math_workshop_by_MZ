@@ -1,13 +1,11 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#define RANGE 100
 #define MIN_EPSILON 1e-15
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <limits.h>
 #include <math.h>
 
@@ -27,6 +25,49 @@ void print_info() {
     printf("Laboratory work #1_3\n\n");
 }
 //-----------------
+
+
+
+//<-t>
+enum right_triangle_status_codes
+{
+    right_triangle,
+    invalid_input_for_triangle,
+    not_triangle
+};
+
+enum right_triangle_status_codes is_right_triangle(long double epsilon, long double a, long double b, long double c)
+{
+    if(a < 0 || b < 0 || c < 0 || 
+            fabsl(a) < epsilon || fabsl(b) < epsilon || fabsl(c) < epsilon)
+    {
+        return invalid_input_for_triangle;
+    }
+    else if (((fabsl(a * a + b * b - c * c) <= epsilon) || (fabsl(c * c + b * b - a * a) <= epsilon) || (fabsl(a * a + c * c - b * b) <= epsilon)))
+    {
+        return right_triangle;
+    }
+    return not_triangle;
+
+
+}
+
+void print_triangle_solution(enum right_triangle_status_codes check, long double a, long double b, long double c)
+{
+    switch (check)
+    {
+        case invalid_input_for_triangle:
+            printf("You entered incorrect data to check that the triangle is right-angled\n");
+            break;
+        case not_triangle:
+            printf("A triangle with sides %Lf %Lf %Lf is not right\n", a, b, c);
+            break;
+        case right_triangle:
+            printf("A triangle with sides %Lf %Lf %Lf is right\n", a, b, c);
+            break;
+    }
+}
+//--------------------------------
 
 
 //<-m>
@@ -235,6 +276,10 @@ enum input_check_status_codes Input_checker(int argc, char* argv[],
     }
     return invalid_input;
 }
+//--------------------------
+
+
+
 
 void use_flag(char flag, long double * parameters, int argc)
 {
@@ -282,7 +327,7 @@ void use_flag(char flag, long double * parameters, int argc)
             }
             break;
         case 't':
-            printf("Wait t\n");
+            print_triangle_solution(is_right_triangle(epsilon, a, b, c), a, b, c);
             break;
     }
 }
