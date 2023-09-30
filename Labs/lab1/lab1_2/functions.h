@@ -18,36 +18,6 @@ long double precalculation_for_gamma;
 
 const long long MAX_N = 1e5;
  
-long long sieve_of_eratoshen[MAX_N + 1];
-long long prime_numbers[MAX_N + 1];
- 
-void sieve()
-{
-    for (long long i = 2; i * i <= MAX_N; ++i)
-    {
-        if (sieve_of_eratoshen[i] > 0)
-        {
-            continue;
-        }
-        for (long long j = 2;  i * j <= MAX_N; ++j)
-        {
-            sieve_of_eratoshen[i * j] = 1;
-        }
-    }
-}
-
-void prime_array ()
-{
-    long long n = 0;
-    for (long long i = 2; i <= MAX_N; i++)
-    {
-        if (sieve_of_eratoshen[i] == 0)
-        {
-            prime_numbers[n] = i;
-            n++;
-        }
-    }
-}
 
 
 
@@ -412,6 +382,26 @@ void print_sqrt (long double epsilon)
 
 
 //for γ gamma
+enum prime_status_code
+{
+    prime,
+    not_prime
+};
+
+
+enum prime_status_code is_prime(long long number, long long * arr) {
+    if (number <= 1) {
+        return not_prime;
+    }
+    printf("%d\n", (int)sqrtl(number));
+    for (int divisor = 0; divisor <= (int)sqrtl(number); divisor++) {
+        if (number % arr[divisor] == 0) {
+            return not_prime;
+        }
+    }
+    return prime;
+}
+
 long double gamma_number_by_limit (long double epsilon)
 {
     
@@ -444,21 +434,72 @@ long double series_gamma_Number(long double epsilon)
     return gamma;
 }
 
-void precalculation_product (long double epsilon)
+enum precalc_status_codes
 {
-    precalculation_for_gamma = 1.0L; 
-    long double term = 1.0L, prev_term = 0.0L;
-    long long p = 1, t = 0; 
-    do
+    good_malloc,
+    not_good_malloc
+};
+
+enum precalc_status_codes precalculation_product (long double epsilon)
+{
+    precalculation_for_gamma = 0.5L; 
+    long long * prime_arr;
+    prime_arr = (long long *)malloc(sizeof(long long) * MAX_N);
+    if (prime_arr == NULL)
     {
-        p = prime_numbers[t];
+        return not_good_malloc;
+    }
+    long double term = 1.0L, prev_term = 0.5L;
+    long long p = 2, t = 0, n = MAX_N; 
+    long long i = 2;
+    prime_arr[0] = 2;
+    prime_arr[1] = 3;
+
+
+    for (long long t = 5; t <= n; t += 2)
+    {
+        if (t == n)
+        {
+            n = 2 * n;
+            long long * check_prime_arr;
+            check_prime_arr = (long long * )realloc(prime_arr, n * sizeof(long double));
+            if (check_prime_arr == NULL)
+            {
+                free(prime_arr);
+                return not_good_malloc;
+            }
+            prime_arr = check_prime_arr;
+        }
+        switch(is_prime(t, prime_arr))
+        {
+            case prime:
+                prime_arr[i] = t;
+                i++;
+                break;
+            case not_prime:
+                if (fabsl(term - prev_term) <= epsilon)
+                {
+                    t = p + 2;
+                    precalculation_for_gamma = precalculation_for_gamma * log(t);
+                    free(prime_arr);
+                    return good_malloc;
+                }
+                continue;  
+        }
+        p = t;
         prev_term = term;
         term = ((long double)p - 1) / (long double)p;
         precalculation_for_gamma *= term;
-        t++;
-    } while (fabsl(term - prev_term) > epsilon);
-    t = p + 1;
-    precalculation_for_gamma = precalculation_for_gamma * log(t);
+        if (fabsl(term - prev_term) <= epsilon)
+        {
+            t = p + 2;
+            precalculation_for_gamma = precalculation_for_gamma * log(t);
+            free(prime_arr);
+            return good_malloc;
+        }
+    }
+    return not_good_malloc;
+
 }
 
 long double function_e_gamma(long double x) {
@@ -473,10 +514,15 @@ void print_gamma (long double epsilon)
 {
     printf("By limit: %.9Lf\n", gamma_number_by_limit(epsilon));
     printf("By series: %.9Lf\n", series_gamma_Number(epsilon));
-    sieve();
-    prime_array();
-    precalculation_product(epsilon);
-    printf("By e^-x = lim(ln(t)  П (p - 1) / p) && Newton's method: %.9Lf\n", newton_Method(0.0L, 1.0L, epsilon, &function_e_gamma, &dfunction_e_gamma));
+    switch(precalculation_product(epsilon))
+    {
+        case good_malloc:
+            printf("By e^-x = lim(ln(t)  П (p - 1) / p) && Newton's method: %.9Lf\n", newton_Method(0.0L, 1.0L, epsilon, &function_e_gamma, &dfunction_e_gamma));
+            break;
+        case not_good_malloc:
+            printf("Memmory allocation problem\n");
+            break;
+    }
     printf("By 'math.h' %.9f\n\n", CONST_EULER_GAMMA);
 }
 //--------------------------------
