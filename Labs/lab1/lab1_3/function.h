@@ -78,7 +78,7 @@ enum multiplicity_status_codes{
 };
 
 enum multiplicity_status_codes multiplicity_of_two_numbers(long double first_number, long double second_number){
-    if (first_number < 0 || second_number < 0 || first_number != (long long)first_number || second_number != (long long)second_number)
+    if (first_number < 0 || second_number <= 0 || first_number != (long long)first_number || second_number != (long long)second_number)
     {
         return invalid_input_numbers;
     }
@@ -100,6 +100,7 @@ enum solution_status_codes
 enum solution_status_codes solution_equation(long double epsilon, long double a, long double b, long double c, long double * x1, long double * x2)
 {
     long double descrimenant = b * b - 4.0L * a * c;
+    
     if (descrimenant < epsilon)
     {
         return negative_descrimenant;
@@ -288,13 +289,13 @@ void use_flag(char flag, long double * parameters, int argc)
     switch (flag) 
         {
         case 'q':
-            if (a == b && a == c)
+            if (fabsl(a - b) < epsilon && fabsl(a - c) < epsilon)
             {
                 print_solution_the_equation(solution_equation(epsilon, a, a, a, &x1, &x2), a, a, a, x1, x2);
             }
-            else if ((a == b && a != c) || 
-                    (a == c && b != c) || 
-                    (b == c && a != c))
+            else if ((fabsl(a - b) < epsilon && fabsl(a - c) >= epsilon) || 
+                    (fabsl(a - c) < epsilon && fabsl(c - b) >= epsilon) || 
+                    (fabsl(c - b) < epsilon && fabsl(a - c) >= epsilon))
             {
                 print_solution_the_equation(solution_equation(epsilon, a, b, c, &x1, &x2), a, b, c, x1, x2);
                 print_solution_the_equation(solution_equation(epsilon, b, c, a, &x1, &x2), b, c, a, x1, x2);

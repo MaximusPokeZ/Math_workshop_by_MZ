@@ -158,6 +158,7 @@ void print_sum_of_natural_numbers (enum digit_check_status_codes status, long lo
 
 bool is_negative(char* number)
 {
+
     if (number[0] == '-')
     {
         return true;
