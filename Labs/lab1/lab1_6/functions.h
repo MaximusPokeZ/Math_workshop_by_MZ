@@ -9,7 +9,7 @@
 #include <math.h>
 
 
-#define MIN_EPSILON 1e-15
+#define MIN_EPSILON 1e-9
 
 
 //info print
@@ -136,26 +136,48 @@ void print_integral_sum (const long double result, const char name)
     printf("Solution of integral #%c : %Lf\n", name, result);
 }
 
-long double func_1(long double x) {
+long double func_1(long double x, long double epsilon) {
     if (x == 0.0L) {
-        return 1.0L;
+        return log(1 + x) / (x + epsilon);
     }
     return log(1 + x) / x;
 }
 
+long double func_2(long double x, long double epsilon) {
+    if (x == 0.0L) {
+        return 1.0L;
+    }
+    return exp(-x * x * 0.5);
+}
 
-long double simpson_method (long double a, long double b, long double epsilon) {
-    int n = 2; // Начнем с двух интервалов
+long double func_3(long double x, long double epsilon) {
+    if (x == 1.0L) {
+        return -log(1 - x + epsilon);
+    }
+    return -log(1 - x);
+}
+
+long double func_4(long double x, long double epsilon) {
+    if (x == 0.0L) {
+        return powl(x + epsilon, x + epsilon);
+    }
+    return powl(x, x);
+}
+
+
+
+long double simpson_method (long double a, long double b, long double epsilon, long double (*function) (long double, long double)) {
+    int n = 2; 
     long double integral = 0.0L;
     long double prev_integral = 0.0L;
 
     do {
         prev_integral = integral;
-        integral = func_1(a) + func_1(b);
+        integral = function(a, epsilon) + function(b, epsilon);
         long double h = (b - a) / n;
         for (int i = 1; i < n; i++) {
             long double x = a + i * h;
-            long double fx = func_1(x);
+            long double fx = function(x, epsilon);
             if (i % 2 == 1) {
                 integral += 4 * fx;
             } else {
