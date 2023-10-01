@@ -200,11 +200,12 @@ long double sum_b (const long double x, const long double epsilon)
     long double prev_term = 0.0L;
     long double term = 1.0L;
     long double sum = 1.0L;
-    long long n = 1;
+    long long n = 0;
+    long double X = x * x;
     do
     {
         prev_term = term;
-        term = (-1 * prev_term * x * x) / ((2 * n) * (2 * n - 1));
+        term = (-1 * prev_term * X) / ((2 * n + 1) * (2 * n + 2));
         sum += term;
         n++;
     } while (fabsl(prev_term - term) > epsilon);
@@ -212,5 +213,47 @@ long double sum_b (const long double x, const long double epsilon)
 }
 //--------------------------------
 
+
+//c
+long double sum_c(const long double x, const long double epsilon)
+{   
+
+    long double prev_term = 0.0L;
+    long double term = 1.0L;
+    long double sum = 1.0L;
+    long long n = 0;
+    int three = 27;
+    long double X = x * x;
+    do
+    {
+        prev_term = term;
+        term = (prev_term * three * (n + 1) * (n + 1) * (n + 1) * X) / ((3 * n + 1) * (3 * n + 2) * (3 * n + 3));
+        sum += term;
+        n++;
+    } while (fabsl(prev_term - term) > epsilon);
+    return sum;
+}
+//--------------------------------
+
+
+//d
+long double sum_d(const long double x, const long double epsilon)
+{   
+
+    long double prev_term = 0.0L;
+    long double term = -x * x * 0.5L;
+    long double sum = term;
+    long long n = 1;
+    long double X = x * x;
+    do
+    {
+        prev_term = term;
+        term = (-1 * prev_term * (n + 2) * X) / (n + 3);
+        sum += term;
+        n++;
+    } while (fabsl(prev_term - term) > epsilon);
+    return sum;
+}
+//--------------------------------
 
 #endif

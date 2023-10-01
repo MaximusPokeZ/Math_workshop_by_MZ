@@ -31,10 +31,24 @@ int main(int argc, char* argv[])
         printf("Underflow_intput\n");
         break;
     case true_input:
+        if (parameters_x_eps[0] > 100 || parameters_x_eps[0] < MIN_EPSILON)
+        {
+            printf("1e-15 < |X| < 100\n");
+            break;
+        }
         printf("X = %.3Lf\n", parameters_x_eps[0]);
         printf("Epsilon = %.9Lf\n", parameters_x_eps[1]);
         print_sum_(sum_a(parameters_x_eps[0], parameters_x_eps[1]), 'a');
         print_sum_(sum_b(parameters_x_eps[0], parameters_x_eps[1]), 'b');
+        if (parameters_x_eps[0] >= 1)
+        {
+            printf("For sums 'C' && 'D' x must be in the range |X| < 1\n");
+        }
+        else
+        {
+            print_sum_(sum_c(parameters_x_eps[0], parameters_x_eps[1]), 'c');
+            print_sum_(sum_d(parameters_x_eps[0], parameters_x_eps[1]), 'd');  
+        }
         break;
     }
 
