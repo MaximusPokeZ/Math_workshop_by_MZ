@@ -184,6 +184,14 @@ long double sum_a (const long double x, const long double epsilon)
     long long n = 2;
     do
     {
+        if (fabsl(x - n) < epsilon)
+        {
+            prev_term = 0;
+            term = (term * x) / n;
+            sum += term;
+            n++;
+            continue;
+        }
         prev_term = term;
         term = (term * x) / n;
         sum += term;
