@@ -256,7 +256,7 @@ long double sum_d(const long double x, const long double epsilon)
     do
     {
         prev_term = term;
-        term = (-1 * prev_term * (n + 2) * X) / (n + 3);
+        term = (-1 * prev_term * (2 * n + 1) * X) / (2 * n + 2);
         sum += term;
         n++;
     } while (fabsl(prev_term - term) > epsilon);
