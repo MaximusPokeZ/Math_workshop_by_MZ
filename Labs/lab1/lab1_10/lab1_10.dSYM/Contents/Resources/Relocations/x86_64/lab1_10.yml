@@ -1,9 +1,0 @@
----
-triple:          'x86_64-apple-darwin'
-binary-path:     '/Users/vladimirzaslavtsev/University/MatPractic_Osi/MatPractic/Labs/lab1/lab1_10/lab1_10'
-relocations:
-  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _check_start_enter, symObjAddr: 0x0, symBinAddr: 0x100003CA0, symSize: 0x40 }
-  - { offsetInCU: 0x61, offset: 0x61, size: 0x8, addend: 0x0, symName: _check_start_enter, symObjAddr: 0x0, symBinAddr: 0x100003CA0, symSize: 0x40 }
-  - { offsetInCU: 0x89, offset: 0x89, size: 0x8, addend: 0x0, symName: _char_to_num, symObjAddr: 0x40, symBinAddr: 0x100003CE0, symSize: 0x70 }
-  - { offsetInCU: 0xB1, offset: 0xB1, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0xB0, symBinAddr: 0x100003D50, symSize: 0x128 }
-...
