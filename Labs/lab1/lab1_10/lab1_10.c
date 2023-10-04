@@ -15,6 +15,7 @@ int main()
     }
 
     char input[SIZE];
+    char * input_ptr = input;
     long long max_number, temp = 0;
     enum correct_input_status_codes flag = not_correct;
     printf("Enter numbers in systems with your radix or Stop:\n");
@@ -63,17 +64,17 @@ int main()
     {
     case correct:
         printf("The maximum modulo of your numbers: %lld\n", max_number);
-        transfer_from_int(&input, max_number, 9);
-        print_to_radix(input, 9);
+        transfer_from_int(input_ptr, max_number, 9);
+        print_to_radix(input_ptr, 9);
 
-        transfer_from_int(&input, max_number, 18);
-        print_to_radix(input, 18);
+        transfer_from_int(input_ptr, max_number, 18);
+        print_to_radix(input_ptr, 18);
 
-        transfer_from_int(&input, max_number, 27);
-        print_to_radix(input, 27);
+        transfer_from_int(input_ptr, max_number, 27);
+        print_to_radix(input_ptr, 27);
 
-        transfer_from_int(&input, max_number, 36);
-        print_to_radix(input, 36);
+        transfer_from_int(input_ptr, max_number, 36);
+        print_to_radix(input_ptr, 36);
         break;
     case not_correct:
         printf("The numbers were not entered or they are incorrect\n");
