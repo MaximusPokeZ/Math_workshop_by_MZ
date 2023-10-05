@@ -205,8 +205,10 @@ void without_arabic(char *input_file_name, char* output_file_name, char status)
             fprintf(output_file, "%c", symbol);
         }
     }
-    fclose(input_file);
-    fclose(output_file);
+    if (fclose(output_file) != 0 || fclose(input_file) != 0) 
+    {
+        printf("An error occurred while closing the file\n");
+    } 
 }
 
 
@@ -274,8 +276,10 @@ void count_of_latin_or_not_latin (char *input_file_name, char* output_file_name,
         }
         fprintf(output_file, "%lu line:  %lu\n", number_of_str, counter);
     }
-    fclose(input_file);
-    fclose(output_file);
+    if (fclose(output_file) != 0 || fclose(input_file) != 0) 
+    {
+        printf("An error occurred while closing the file\n");
+    } 
 }
 
 
@@ -340,8 +344,10 @@ void liters_to_16ss (char *input_file_name, char* output_file_name, char status)
             }
         }
     }
-    fclose(input_file);
-    fclose(output_file);
+    if (fclose(output_file) != 0 || fclose(input_file) != 0) 
+    {
+        printf("An error occurred while closing the file\n");
+    } 
 }
 
 
