@@ -6,6 +6,8 @@
 int main(int argc, char *argv[])
 {
     char flag;
+
+
     switch (input_checker(argc, argv, &flag))
     {
     case invalid_input:
