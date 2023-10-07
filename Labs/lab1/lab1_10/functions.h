@@ -1,3 +1,6 @@
+#ifndef FUNCTION_H
+#define FUNCTION_H
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
@@ -114,3 +117,5 @@ void print_to_radix(char *str, int base)
 {
     printf("Your number in the %d number system: %s\n", base, str);
 }
+
+#endif
