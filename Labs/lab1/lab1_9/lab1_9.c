@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     }
     printf("\n\nTask 2:\n");
 
-    int len_array1 = get_random_value(MIN_RANGE, MAX_RANGE);
-    int len_array2 = get_random_value(MIN_RANGE, MAX_RANGE);
+    int len_array1 = 4;//get_random_value(MIN_RANGE, MAX_RANGE);
+    int len_array2 = 2;//get_random_value(MIN_RANGE, MAX_RANGE);
     int *array_a = (int *)malloc(sizeof(int) * len_array1);
     int *array_b = (int *)malloc(sizeof(int) * len_array2);
     int *array_c = (int *)malloc(sizeof(int) * len_array1);

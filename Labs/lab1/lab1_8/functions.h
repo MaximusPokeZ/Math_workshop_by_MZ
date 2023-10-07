@@ -64,7 +64,7 @@ enum is_valid_number_status_codes
 
 
 enum is_valid_number_status_codes check_symbol(char c) {
-    if (isdigit(c) || (isalpha(c) && c >= 'A' && c <= 'Z')) {
+    if (isdigit(c) || (c >= 'A' && c <= 'Z')) {
         return valid; 
     }
     return not_valid; 
@@ -72,8 +72,7 @@ enum is_valid_number_status_codes check_symbol(char c) {
 
 int find_base(char c)
 {   
-    if (c >= '0' && c <= '1') return 1;
-    if (c >= '2' && c <= '9')
+    if (c >= '0' && c <= '9')
     {
         return c - '0' + 1;
     }

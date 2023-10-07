@@ -144,8 +144,8 @@ int bin_search(int *array, int length, int x)
             left = mid;
         }
     }
-    int diff_left_value = abs(array[left] - x);
-    int diff_right_value = abs(array[left] - x);
+    int diff_left_value = (array[left] - x);
+    int diff_right_value = (array[left] - x);
     if (diff_left_value > diff_right_value)
     {
         return array[right];

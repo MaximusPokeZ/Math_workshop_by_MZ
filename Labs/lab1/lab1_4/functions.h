@@ -20,107 +20,6 @@ void print_info() {
     printf("Laboratory work #1_4\n\n");
 }
 
-
-enum input_status_code {
-    info_input_help,
-    info_input,
-    invalid_input,
-    flag_d,
-    flag_i,
-    flag_s,
-    flag_a,
-    flag_nd,
-    flag_ni,
-    flag_ns,
-    flag_na
-};
-
-
-enum input_status_code input_checker(int argc, char **argv) {
-    if (argc < 3 || argc > 4) 
-    {
-        return invalid_input;
-    } 
-    else if (!strcmp(argv[1], "-help") || !strcmp(argv[1], "/help")) 
-    {
-        return info_input_help;
-    } 
-    else if (!strcmp(argv[1], "-info") || !strcmp(argv[1], "/info")) 
-    {
-        return info_input;
-    }
-    else if (argc == 3) 
-    {
-        if (!strcmp(argv[1], "-d") || !strcmp(argv[1], "/d")) 
-        {
-            return  flag_d;
-        } 
-        else if (!strcmp(argv[1], "-i") || !strcmp(argv[1], "/i")) 
-        {
-            return flag_i;
-        } 
-        else if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "/s")) 
-        {
-            return flag_s;
-        } 
-        else if (!strcmp(argv[1], "-a") || !strcmp(argv[1], "/a")) 
-        {
-            return flag_a;
-        } 
-        else 
-        {
-            return invalid_input;
-        }
-    } 
-    else if (argc == 4) 
-    {
-        if (!strcmp(argv[1], "-nd") || !strcmp(argv[1], "/nd")) 
-        {
-            return flag_nd;
-        } 
-        else if (!strcmp(argv[1], "-ni") || !strcmp(argv[1], "/ni")) 
-        {
-            return flag_ni;
-        } 
-        else if (!strcmp(argv[1], "-ns") || !strcmp(argv[1], "/ns")) 
-        {
-            return flag_ns;
-        } 
-        else if (!strcmp(argv[1], "-na") || !strcmp(argv[1], "/na")) 
-        {
-            return flag_na;
-        } else {
-            return invalid_input;
-        }
-    }
-    return invalid_input;
-}
-
-//File open checkers
-enum is_open_file_read_write {
-    file_error,
-    file_ok
-};
-
-
-enum is_open_file_read_write file_read_write(char *file_name, char * letter) {
-    FILE *file = NULL;
-    file = fopen(file_name, letter);
-    if (!(file)) 
-    {
-        return file_error;
-    } 
-    else 
-    {
-        fclose(file);
-        return file_ok;
-    }
-}
-
-//----------------------------
-
-
-
 char * create_output_file(char *input_file_name) {
     int length = strlen(input_file_name);
     int out_length = length;
@@ -165,33 +64,123 @@ char * create_output_file(char *input_file_name) {
     return output_file_name;
 }
 
+enum flag_check_and_n
+{
+    is_n,
+    not_n,
+    undefined_flag,
+    not_flag
+};
+
+enum flag_check_and_n check_flags(char * flag)
+{
+    if (flag[0] == '-'|| flag[0] == '/')
+    {
+        if (flag[1] == 'd' || flag[1] == 'i' || flag[1] == 's' || flag[1] == 'a')
+        {
+            return not_n;
+        }
+        if (flag[1] == 'n' &&  (flag[2] == 'd' || flag[2] == 'i' || flag[2] == 's' || flag[2] == 'a'))
+        {
+            return is_n;
+        }
+        return undefined_flag;
+    }
+    return not_flag;
+}
+
+
+
+enum input_status_code {
+    info_input_help,
+    info_input,
+    invalid_input,
+    flag_d,
+    flag_i,
+    flag_s,
+    flag_a,
+};
+
+
+enum input_status_code input_checker(int argc, char **argv, char ** out_name) {
+    if (argc < 3 || argc > 4) 
+    {
+        return invalid_input;
+    } 
+    else if (!strcmp(argv[1], "-help") || !strcmp(argv[1], "/help")) 
+    {
+        return info_input_help;
+    } 
+    else if (!strcmp(argv[1], "-info") || !strcmp(argv[1], "/info")) 
+    {
+        return info_input;
+    }
+    else if (argc == 3 || argc == 4) 
+    {
+        char flag;
+        switch (check_flags(argv[1]))
+        {
+            case is_n:
+                *out_name = argv[3];
+                flag = argv[1][2];
+                break;
+            case not_n:
+                *out_name = create_output_file(argv[2]);
+                flag = argv[1][1];
+                break;
+            case undefined_flag:
+                return invalid_input;
+            case not_flag:
+                return invalid_input;
+        }
+        switch (flag)
+        {
+            case 'd':
+                return flag_d;
+            case 'i':
+                return flag_i;
+            case 's':
+                return flag_s;
+            case 'a':
+                return flag_a; 
+        }
+    }
+    return invalid_input;
+}
+
+//File open checkers
+enum is_open_file_read_write {
+    file_error,
+    file_ok
+};
+
+
+enum is_open_file_read_write file_read_write(char *file_name, char * letter) {
+    FILE *file = NULL;
+    file = fopen(file_name, letter);
+    if (!(file)) 
+    {
+        return file_error;
+    } 
+    else 
+    {
+        fclose(file);
+        return file_ok;
+    }
+}
+
+//----------------------------
+
 
 
 //tasks
-void without_arabic(char *input_file_name, char* output_file_name, char status) 
+void without_arabic(char *input_file_name, char* output_file_name) 
 {
     FILE *input_file = NULL;
     FILE *output_file = NULL;
-    switch (status)
+    if (!(input_file = fopen(input_file_name, "r")) || !(output_file = fopen(output_file_name, "w"))) 
     {
-        case 'n':
-            if (!(output_file = fopen(create_output_file(input_file_name), "w"))) 
-            {
-                printf("%s\n", create_output_file(input_file_name));
-                printf("Error with openning output file!\n");
-            }
-            break;
-        case '-':
-            if (!(output_file = fopen(output_file_name, "w")))
-            {
-                printf("Error with openning output file!\n");
-            }
-            break;
-    }
-    
-    if (!(input_file = fopen(input_file_name, "r"))) 
-    {
-        printf("Error with openning input file!\n");
+        printf("Error with openning files!\n");
     } 
     else 
     {
@@ -212,30 +201,14 @@ void without_arabic(char *input_file_name, char* output_file_name, char status)
 }
 
 
-void count_of_latin_or_not_latin (char *input_file_name, char* output_file_name, char status, char flag_latin_not)
+void count_of_latin_or_not_latin (char *input_file_name, char* output_file_name, char flag_latin_not)
 {
     FILE *input_file = NULL;
     FILE *output_file = NULL;
-    switch (status)
+    if (!(input_file = fopen(input_file_name, "r")) || !(output_file = fopen(output_file_name, "w"))) 
     {
-        case 'n':
-            if (!(output_file = fopen(create_output_file(input_file_name), "w"))) 
-            {
-                printf("Error with openning output file!\n");
-            }
-            break;
-        case '-':
-            if (!(output_file = fopen(output_file_name, "w")))
-            {
-                printf("Error with openning output file!\n");
-            }
-            break;
-    }
-    
-    if (!(input_file = fopen(input_file_name, "r"))) 
-    {
-        printf("Error with openning input file!\n");
-    }
+        printf("Error with openning files!\n");
+    } 
     else 
     {
         unsigned long number_of_str = 1, counter = 0;
@@ -247,7 +220,7 @@ void count_of_latin_or_not_latin (char *input_file_name, char* output_file_name,
                 {
                     if (symbol == '\n')
                     {
-                        fprintf(output_file, "%lu:  %lu\n", number_of_str, counter);
+                        fprintf(output_file, "%lu line:  %lu\n", number_of_str, counter);
                         number_of_str++;
                         counter = 0;
                     }
@@ -303,26 +276,10 @@ void liters_to_16ss (char *input_file_name, char* output_file_name, char status)
 {
     FILE *input_file = NULL;
     FILE *output_file = NULL;
-    switch (status)
+    if (!(input_file = fopen(input_file_name, "r")) || !(output_file = fopen(output_file_name, "w"))) 
     {
-        case 'n':
-            if (!(output_file = fopen(create_output_file(input_file_name), "w"))) 
-            {
-                printf("Error with openning output file!\n");
-            }
-            break;
-        case '-':
-            if (!(output_file = fopen(output_file_name, "w")))
-            {
-                printf("Error with openning output file!\n");
-            }
-            break;
-    }
-    
-    if (!(input_file = fopen(input_file_name, "r"))) 
-    {
-        printf("Error with openning input file!\n");
-    }
+        printf("Error with openning files!\n");
+    } 
     else 
     {
         char symbol;

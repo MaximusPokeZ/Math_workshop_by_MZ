@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
             fclose(input_file); //?
             return 1;
         }
+
         while ((symbol = fgetc(input_file)) != EOF)
         {
             switch(check_symbol(symbol))
@@ -47,6 +48,12 @@ int main(int argc, char* argv[])
                     {
                        number[i] = '\0';
                        decimal_value = ss_to_base_10(number_ptr, min_base);
+                       if ((i >= SIZE - 1) || (decimal_value < 0))
+                        {
+                        printf("Find number longer than 32 characters\nOverflow\n"); 
+                        fprintf(output_file, "%s %d Overflow\n", number, min_base); 
+                        continue;
+                        }
                        fprintf(output_file, "%s %d %lld\n", number, min_base, decimal_value); 
                        min_base = 2;
                        i = 0;
@@ -61,8 +68,7 @@ int main(int argc, char* argv[])
                         min_base = base;
                     }
                     if (i >= SIZE - 1)
-                    {
-                        printf("The number must be no longer than 32 characters\n");
+                    { 
                         continue;
                     }
                     number[i] = symbol;
@@ -78,7 +84,15 @@ int main(int argc, char* argv[])
     {
         number[i] = '\0';
         decimal_value = ss_to_base_10(number_ptr, min_base);
-        fprintf(output_file, "%s %d %lld\n", number, min_base, decimal_value); 
+        if ((i >= SIZE - 1) || (decimal_value < 0))
+        {
+            printf("Find number longer than 32 characters\nOverflow\n"); 
+            fprintf(output_file, "%s %d Overflow\n", number, min_base); 
+        }
+        else
+        {
+            fprintf(output_file, "%s %d %lld\n", number, min_base, decimal_value);
+        } 
     }
 
     if (fclose(output_file) != 0 || fclose(input_file) != 0) 

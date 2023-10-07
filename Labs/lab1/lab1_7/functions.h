@@ -113,6 +113,7 @@ enum check_with_read read_write_files_r(FILE *file1, FILE *file2, FILE *result)
             str = get_str(file1, &status);
             if (status == long_string) 
             {
+                free(str);
                 return long_string; 
             }
             skip_trashes(file1);
