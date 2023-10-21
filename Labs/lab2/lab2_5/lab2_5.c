@@ -14,7 +14,10 @@ int main() {
     unsigned int uint_value = 144;
     float float_value = 3.14;
     double double_value = 2.71828;
-
+    char test[] = "30";
+    int p1;
+    int p2;
+    overfprintf(stdout, "%%\n", &p1, &p2, p1, p2);
     overfprintf(stdout, "Rome : %Ro \nCyckendorf : %Zr\nToBase 16: %Cv\t%CV\t ToBase 10: %to\t%TO\n", num1, num2, num_to, to_base, num_to, to_base, str1, base, str2, base);
     overfprintf(stdout, "Dump int: %mi\nDump uint: %mu\nDump float: %mf\nDump double: %md\n\n", int_value, uint_value, float_value, double_value);
 

@@ -2,21 +2,27 @@
 
 int main() 
 {
-    Indexes * results = NULL;
-    enum status_codes status_result = find_patterns(&results, "123", "in1.txt", "in2.txt", NULL);
+    Indexes *results = NULL;
+    enum status_codes status_result = find_patterns(&results, "  ", "in1.txt", "in2.txt", NULL);
     if (status_result == status_ok)
     {
         printf("Ok\n");
         for (int i = 0; results[i].file_name != NULL; i++)
         {
-            printf("В файле %s найдено вхождение подстроки на позиции: ", results[i].file_name);
-            if (results[i].count_indx == 0) printf ("не найдено");
-            for (int j = 0; j < results[i].count_indx; j++)
+            printf("An occurrence of the substring was found in the file %s:\n", results[i].file_name);
+            if (results[i].count_indx == 0) 
             {
-                printf("%u ", results[i].indx[j]);
+                printf("Not found\n");
             }
-            printf("\n");
+            else 
+            {
+                for (int j = 0; j < results[i].count_indx; j++)
+                {
+                    printf("In line %u, position is %u\n", results[i].str[j], results[i].indx[j]);
+                }
+            }
             free(results[i].indx);
+            free(results[i].str);
         }
         free(results);
     }

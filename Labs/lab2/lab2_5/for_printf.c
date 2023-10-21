@@ -129,7 +129,7 @@ int check_flags(FILE* stream, const char* format, va_list* ptr, char ** string)
         else
         {
             if (stream == NULL) {result += sprintf(buffer_ptr, "%c", *format); buffer_ptr++;}
-            else result += fputc(*format, stream); 
+            else result += fprintf(stream, *format); 
             format++;
         }
     }
