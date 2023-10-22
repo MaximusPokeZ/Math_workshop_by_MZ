@@ -20,6 +20,7 @@ enum transfer_to_status_codes
 {
     out_of_range,
     memory_allocation_problem,
+    unknown_data_type,
     ok_transfer
 };
 
@@ -192,7 +193,7 @@ enum transfer_to_status_codes ss_to_base_10(char* str, int base, long long * res
     return ok_transfer;
 }
 
-void print_memory_dump(const void* value, enum DataType type, FILE* stream, int* result, char ** string) {
+enum transfer_to_status_codes print_memory_dump(const void* value, enum DataType type, char * result_buffer, int * chars_written, size_t buffer_size) {
     const unsigned char* bytes = (const unsigned char*)value;
     int size = 0;
 
@@ -202,9 +203,7 @@ void print_memory_dump(const void* value, enum DataType type, FILE* stream, int*
     else if (type == DOUBLE) size = sizeof(double);
     else
     {
-        if (stream == NULL) {*result += sprintf(*string, "Unknown data type\n"); *string += strlen("Unknown data type\n");}
-        else *result += fprintf(stream, "Unknown data type\n");
-        return;
+        return unknown_data_type;
     }
 
     for (int i = 0; i < size; i++) 
@@ -212,11 +211,9 @@ void print_memory_dump(const void* value, enum DataType type, FILE* stream, int*
         for (int bit = 7; bit >= 0; bit--) 
         {
             int bit_value = (bytes[i] >> bit) & 1;
-            if (stream == NULL) {*result += sprintf(*string, "%d", bit_value); (*string)++;}
-            else *result += fprintf(stream, "%d", bit_value);
+            *chars_written += snprintf(result_buffer + *chars_written, buffer_size - *chars_written, "%d", bit_value);
         }
-        if (stream == NULL) {*result += sprintf(*string, " "); (*string)++;}
-        else *result += fprintf(stream, " ");
-        
+        *chars_written += snprintf(result_buffer + *chars_written, buffer_size - *chars_written, "%c", ' ');
     }
+    return ok_transfer;
 }
