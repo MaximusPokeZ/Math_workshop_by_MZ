@@ -1,6 +1,7 @@
 #include "functions.c"
 
 #define STRING_SIZE 300
+#define FLAG_SIZE 20
 
 void print_errors (enum transfer_to_status_codes status)
 {
@@ -22,6 +23,7 @@ void print_errors (enum transfer_to_status_codes status)
 int process_user_flags(const char* format, va_list* ptr, char* result_buffer, size_t buffer_size)
 {
     int chars_written = 0;
+    int for_n = 0;
     while (*format)
     {
         if (*format == '%' && *(format + 1) == 'R' && *(format + 2) == 'o')
@@ -182,6 +184,38 @@ int process_user_flags(const char* format, va_list* ptr, char* result_buffer, si
                 print_errors(dump_status);
             }
         }
+        else if (*format == '%' && *(format + 1) == 'n')
+        {
+            format += 2;
+            int* n_ptr = va_arg(*ptr, int*);
+            int chars_to_write;
+            int minus_prev = for_n;
+            if (n_ptr != NULL)
+            {
+                chars_to_write = vsnprintf(result_buffer, buffer_size, result_buffer, *ptr);
+                for_n += chars_to_write;
+                if (chars_to_write < 0)
+                {
+                    return -1;
+                }
+                *n_ptr = chars_to_write - minus_prev;
+            }
+        }
+        else if (*format == '%')
+        {
+            char flag[FLAG_SIZE];
+            int i = 0;
+            flag[i] = *format; i++;
+            format++;
+            while (*format != ' ' && *format != '\t' && *format != '\n' && *format != '%' && *format != 'd' && *format != 'f' && *format != 'n')
+            {
+                flag[i] = *format;
+                format++; i++;
+            }
+            flag[i] = *format; i++; flag[i] = '\0';
+            format++;
+            chars_written += vsprintf(result_buffer + chars_written, flag, *ptr);
+        }
         else
         {
             int chars_to_write = snprintf(result_buffer + chars_written, buffer_size - chars_written, "%c", *format);
@@ -200,8 +234,10 @@ int process_user_flags(const char* format, va_list* ptr, char* result_buffer, si
 
 int overfprintf(FILE* stream, const char* format, ...) 
 {
-    va_list ptr;
+    va_list ptr, ptr_c;
     va_start(ptr, format);
+    va_copy(ptr_c, ptr);
+    
 
     char result_buffer[STRING_SIZE];
     int user_flags_length = process_user_flags(format, &ptr, result_buffer, sizeof(result_buffer));
@@ -210,7 +246,7 @@ int overfprintf(FILE* stream, const char* format, ...)
 
     if (user_flags_length >= 0)
     {
-        result += vfprintf(stream, result_buffer, ptr);
+        result += fprintf(stream, "%s", result_buffer);
     }
 
     va_end(ptr);
@@ -228,7 +264,7 @@ int oversprintf(char** str, const char* format, ...) {
 
     if (user_flags_length >= 0)
     {
-        result += vsprintf(*str, result_buffer, ptr);
+        result += sprintf(*str, "%s", result_buffer);
     }
 
     va_end(ptr);
