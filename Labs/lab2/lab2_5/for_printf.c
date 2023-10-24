@@ -266,6 +266,7 @@ int oversprintf(char** str, const char* format, ...) {
     {
         result += sprintf(*str, "%s", result_buffer);
     }
+    (*str)[result] = '\0';
 
     va_end(ptr);
     return result;

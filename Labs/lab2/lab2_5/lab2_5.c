@@ -34,26 +34,27 @@ int main() {
 
 
 
-    // char * ptr1;
-    // char * ptr2;
-    // ptr1 = (char *)malloc(sizeof(char) * 100);
-    // if (ptr1 == NULL) return 0;
-    // ptr2 = (char *)malloc(sizeof(char) * 100);
-    // if (ptr2 == NULL) 
-    // {
-    //     free(ptr1);
-    //     return 0;
-    // }
+    char * ptr1;
+    char * ptr2;
+    ptr1 = (char *)malloc(sizeof(char) * 100);
+    if (ptr1 == NULL) return 0;
+    ptr2 = (char *)malloc(sizeof(char) * 100);
+    if (ptr2 == NULL) 
+    {
+        free(ptr1);
+        return 0;
+    }
 
 
-    // oversprintf(&ptr1, "Rome: %Ro\n", num1);
-    // oversprintf(&ptr2, "%mi\n %p", int_value, ptr2);
+    oversprintf(&ptr1, "%d  Rome: %Ro %d", num1, num1, 1234);
+    oversprintf(&ptr2, "%mi %p", int_value, &int_value);
 
 
-    // printf("Formatted String: %s\n", ptr1);
-    // printf("Formatted String: %s\n", ptr2);
-    // free(ptr1);
-    // free(ptr2);
+    printf("String %s ass\n", ptr1); //?????
+    printf("%s", ptr2);
+
+    free(ptr1);
+    free(ptr2);
     return 0;
 }
 
