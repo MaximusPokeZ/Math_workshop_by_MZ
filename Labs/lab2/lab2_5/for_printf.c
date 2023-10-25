@@ -207,7 +207,7 @@ int process_user_flags(const char* format, va_list* ptr, char* result_buffer, si
             int i = 0;
             flag[i] = *format; i++;
             format++;
-            while (*format != ' ' && *format != '\t' && *format != '\n' && *format != '%' && *format != 'd' && *format != 'f' && *format != 'n')
+            while (*format != ' ' && *format != '\t' && *format != '\n' && *format != '%' && *format != 'd' && *format != 'f' && *format != 'n' && *format != 'p' && *format != 's' && *format != 'X' && *format != 'x')
             {
                 flag[i] = *format;
                 format++; i++;
