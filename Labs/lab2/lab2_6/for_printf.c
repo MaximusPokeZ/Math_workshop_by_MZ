@@ -8,7 +8,7 @@ void print_errors(enum transfer_to_status_codes status)
 {
     if (status == out_of_range) 
     {
-        printf("Number out of range for Roman numerals\n");
+        printf("Number out of range\n");
     } 
     else if (status == memory_allocation_problem) 
     {
@@ -20,11 +20,10 @@ void print_errors(enum transfer_to_status_codes status)
     }
 }
 
-int process_user_flags(const char* format, va_list* ptr, FILE* stream)
+int process_user_flags(const char* format, va_list* ptr, FILE* stream, char * str)
 {
     int result = 0;
     int std_index = 0;
-    char buffer[BUFF_SIZE];
     while (*format)
     {
         if (*format == '%' && *(format + 1) == 'R' && *(format + 2) == 'o')
@@ -32,10 +31,14 @@ int process_user_flags(const char* format, va_list* ptr, FILE* stream)
             format += 3;
             int* num = va_arg(*ptr, int*);
             char roman_str[FOR_TRANSFER];
-            if (fscanf(stream, "%s", roman_str) != 1)
+            if (stream != NULL) {if (fscanf(stream, "%s", roman_str) != 1) return -1;}
+            else 
             {
-                return -1;
+                int num_chars_read;
+                if (sscanf(str, "%s %n", roman_str, &num_chars_read) != 1) return -1;
+                str += num_chars_read;
             }
+
             enum transfer_to_status_codes roman_status = roman_to_int(roman_str, num);
             if (roman_status == ok_transfer)
             {
@@ -52,10 +55,14 @@ int process_user_flags(const char* format, va_list* ptr, FILE* stream)
             format += 3;
             unsigned int* num = va_arg(*ptr, unsigned int*);
             char cyckendorf_str[FOR_TRANSFER];
-            if (fscanf(stream, "%s", cyckendorf_str) != 1)
+            if (stream != NULL) {if (fscanf(stream, "%s", cyckendorf_str) != 1) return -1;}
+            else 
             {
-                return -1;
+                int num_chars_read;
+                if (sscanf(str, "%s %n", cyckendorf_str, &num_chars_read) != 1) return -1;
+                str += num_chars_read;
             }
+
             enum transfer_to_status_codes cyckendorf_status = transfer_cyckendorf_to_int(cyckendorf_str, num);
             if (cyckendorf_status == ok_transfer)
             {
@@ -74,10 +81,14 @@ int process_user_flags(const char* format, va_list* ptr, FILE* stream)
             int* num = va_arg(*ptr, int*);
             int base = va_arg(*ptr, int);
             char base_str[FOR_TRANSFER];
-            if (fscanf(stream, "%s", base_str) != 1)
+            if (stream != NULL) {if (fscanf(stream, "%s", base_str) != 1) return -1;}
+            else 
             {
-                return -1;
+                int num_chars_read;
+                if (sscanf(str, "%s %n", base_str, &num_chars_read) != 1) return -1;
+                str += num_chars_read;
             }
+
             enum transfer_to_status_codes transfer_status = ss_to_base_10(base_str, base, num, flag);
             if (transfer_status == ok_transfer)
             {
@@ -105,15 +116,22 @@ int process_user_flags(const char* format, va_list* ptr, FILE* stream)
             if (flag[i - 1] == 'c')
             {
                 char c;
-                while ((c = fgetc(stream)) == ' ' || c == '\t' || c == '\n'){}
-                if (c != EOF)
-                {
-                    *(va_arg(*ptr, char*)) = c;
-                }
+                while (stream != NULL && (c = fgetc(stream)) == ' ' || c == '\t' || c == '\n'){}
+                if (c != EOF && stream != NULL) *(va_arg(*ptr, char*)) = c;
+                while (stream == NULL && (c = sscanf(str, "%c", &c)) == ' ' || c == '\t' || c == '\n'){str++;}
+                if (c != '\0' && stream == NULL) *(va_arg(*ptr, char*)) = c;
             }
             else
             {
-                vfscanf(stream, flag, *ptr);
+                if (stream != NULL) vfscanf(stream, flag, *ptr);
+                else 
+                {
+                    int num_chars_read = 0;
+                    char buffer[BUFF_SIZE];
+                    if (sscanf(str, "%s %n", buffer, &num_chars_read) != 1) return -1;
+                    vsscanf(buffer, flag, *ptr);
+                    str += num_chars_read;
+                }
             }
             result++;
         }
@@ -125,13 +143,22 @@ int process_user_flags(const char* format, va_list* ptr, FILE* stream)
     return result;
 }
 
-int overfscanf(FILE* stream, const char* format, ...)
+int overfscanf(FILE* stream, char* str, const char* format, ...)
 {
     va_list ptr;
     va_start(ptr, format);
 
-    int user_flags_length = process_user_flags(format, &ptr, stream);
+    int user_flags_length = process_user_flags(format, &ptr, stream, str);
     va_end(ptr);
     return user_flags_length;
 }
 
+int oversscanf(FILE* stream, char* str, const char* format, ...)
+{
+    va_list ptr;
+    va_start(ptr, format);
+
+    int user_flags_length = process_user_flags(format, &ptr, stream, str);
+    va_end(ptr);
+    return user_flags_length;
+}

@@ -92,7 +92,7 @@ enum transfer_to_status_codes ss_to_base_10(char* str, int base, int * result, c
     for (; i >= 0 + sign; i--) 
     {
         char c = str[i];
-        if (flag == 'T') digit = (c >= '0' && c <= '9') ? c - '0' : c - 'A' + 10;
+        if (flag == 'V') digit = (c >= '0' && c <= '9') ? c - '0' : c - 'A' + 10;
         else digit = (c >= '0' && c <= '9') ? c - '0' : c - 'a' + 10;
         if (digit >= base) return out_of_range;
         *result = *result + digit * multiplier;

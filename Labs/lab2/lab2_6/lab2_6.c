@@ -11,14 +11,30 @@ int main() {
     int intResult;
     unsigned int uintResult;
     int transfer;
-    int romanResult;
+    int romanResult1;
+    int romanResult2;
     char c1 ,c2;
-    char  str[20];
+    char  test_str[20];
 
 
-    int elementsRead = overfscanf(stdin, "%Ro %s %c %c", &romanResult, str, &c1, &c2);
-    printf("%d %s %c %c\n", romanResult,str, c1, c2);
+    // int num, k;
+
+    // int elementsRead = overfscanf(stdin, NULL, "%d %CV", &num, &k, 11);
+    // printf("%d\n", num);
+    // printf("%d\n", k);
     
+    // float res = 0;
+    
+    // overfscanf(file, NULL, "%f", &res);
+    // printf("\n%.4f\n", res);
+
+    int res1;
+    int res2 = 0;
+    unsigned int res3 = 0;
+    char str[] = "XX 7 001001011";
+    oversscanf(NULL, str, "%Ro %d %Zr", &res2, &res1, &res3);
+    printf("%d %d %u\n", res2, res1, res3);
+
 
     fclose(file); 
 
