@@ -14,14 +14,14 @@ double gorner_calculate(int x, int N, double *mas)
 }
 
 
-void derivative_of_polynomial(int *n, double **mas)
+void derivative_of_polynomial(int *N, double **m)
 {
-    for (int i = 0; i < *n - 1; i++)
+    for (int i = 0; i < *N - 1; i++)
     {
-        (*mas)[i] = (*mas)[i] * ((*n) - (i + 1)); //берем производную и умножаем каждый коэф
+        (*m)[i] = (*m)[i] * ((*N) - (i + 1)); //берем производную и умножаем каждый коэф
     }
-    (*mas)[(*n)-1] = 0; 
-    *n = (*n) -1;
+    (*m)[(*N) - 1] = 0; 
+    *N = (*N) -1;
     
 }
 double* compute_coefficients(double epsilon, double a, int count_coef, ...) 

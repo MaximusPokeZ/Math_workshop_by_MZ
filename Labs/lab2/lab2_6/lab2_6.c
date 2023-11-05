@@ -31,9 +31,10 @@ int main() {
     int res1;
     int res2 = 0;
     unsigned int res3 = 0;
-    char str[] = "XX 7 001001011";
-    oversscanf(NULL, str, "%Ro %d %Zr", &res2, &res1, &res3);
-    printf("%d %d %u\n", res2, res1, res3);
+    char strname[100];
+    char str[] = "XX 7 Maxim 001001011";
+    oversscanf(NULL, str, "%Ro %d %s %Zr", &res2, &res1, strname, &res3);
+    printf("%d %d %u %s\n", res2, res1, res3, strname);
 
 
     fclose(file); 

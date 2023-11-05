@@ -78,11 +78,17 @@ int process_user_flags(const char* format, va_list* ptr, char* result_buffer, si
             enum transfer_to_status_codes transfer_status = int_transfer_to_base(num, &transfer, base, flag, &counter, &sign);
             if (transfer_status == ok_transfer)
             {
+                if (num == 0)
+                {
+                    int chars_to_write = snprintf(result_buffer + chars_written, buffer_size - chars_written, "%s", "0");
+                    chars_written += chars_to_write;
+                }
+                else{
                 for (int i = SIZE_TO_BASE - counter - 1; i < SIZE_TO_BASE - 1 + sign; i++) 
                 {
                     int chars_to_write = snprintf(result_buffer + chars_written, buffer_size - chars_written, "%c", transfer[i]);
                     chars_written += chars_to_write;
-                }
+                }}
                 free(transfer);
             }
             else

@@ -3,10 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #define FOR_START 2
 
-void remove_zeros(char** num) 
+bool remove_zeros(char** num) 
 {
     int len = strlen(*num);
     int leading_zeros = 0;
@@ -19,15 +20,17 @@ void remove_zeros(char** num)
     {
         (*num)[0] = '0';
         (*num)[1] = '\0';
-        return;
+        return true;
     }
     char * new = (char *)malloc(sizeof(char) * (len - leading_zeros + 1));
+    if (new == NULL) return false;
     for (int i = leading_zeros; (*num)[i] != '\0'; i++)
     {
         new[i - leading_zeros] = (*num)[i];
     }
     free(*num);
     *num = new;
+    return true;
 }
 
 char* sum2nums(char* num1, char* num2, int base) 
@@ -70,16 +73,17 @@ char* sum_in_crnt_base(int base, int count, ...)
         free(result);
         result = temp;
     }
-    remove_zeros(&result);
+
     va_end(args);
+    if (!remove_zeros(&result)) return NULL;
     return result;
 }
 
 int main() 
 {
-    int base = 2; 
-    char* num1 = "1"; 
-    char* num2 = "0"; 
+    int base = 16; 
+    char* num1 = "FF"; 
+    char* num2 = "00000000000000000000000000000000000001"; 
     
     char* result = sum_in_crnt_base(base, 2, num1, num2);
     

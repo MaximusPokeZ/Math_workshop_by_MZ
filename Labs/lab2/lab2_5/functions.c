@@ -150,10 +150,14 @@ enum transfer_to_status_codes int_transfer_to_base(int num, char **result, int b
     int r;
     *ptr = 0;
     ptr--;
+    if(num == 0)
+    {
+        return ok_transfer;
+    }
     while (num > 0) 
     {
         r = num % base;
-        if (flag == 'v') *ptr = (r > 9) ? r - 10 + 'A' : r + '0';
+        if (flag == 'V') *ptr = (r > 9) ? r - 10 + 'A' : r + '0';
         else *ptr = (r > 9) ? r - 10 + 'a' : r + '0';
         ptr--;
         num /= base;
