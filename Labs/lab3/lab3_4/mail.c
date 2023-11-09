@@ -7,6 +7,18 @@
 #define MAIL_ID_SIZE 15
 
 
+void free_mail(Mail * mail)
+{
+    if (mail->creation_time.data != NULL) free(mail->creation_time.data);
+    if (mail->delivery_deadline.data != NULL) free(mail->delivery_deadline.data);
+    if (mail->delivery_time.data != NULL) free(mail->delivery_time.data);
+    if (mail->mail_id.data != NULL) free(mail->mail_id.data);
+    if (mail->recipient.building.data != NULL) free(mail->recipient.building.data);
+    if (mail->recipient.city.data != NULL) free(mail->recipient.city.data);
+    if (mail->recipient.index.data != NULL) free(mail->recipient.index.data);
+    if (mail->recipient.street.data != NULL) free(mail->recipient.street.data);
+}
+
 
 void print_mail(const Mail *mail)
 {
@@ -197,7 +209,7 @@ void interactive(Post **post)
             if (buffer[0] == '\0')
             {
                 printf("Город не может быть пустым.\n");
-                continue;;
+                continue;
             }
             mail.recipient.city = create_string(buffer, &status);
             if (status != success) { print_status(status); break; }
@@ -349,6 +361,7 @@ void interactive(Post **post)
                     }
                     else if (response == 'd')
                     {
+                        free_mail(&(*post)->mails[indx]);
                         for (size_t j = indx; j < (*post)->mail_count - 1; j++)
                         {
                             (*post)->mails[j] = (*post)->mails[j + 1];

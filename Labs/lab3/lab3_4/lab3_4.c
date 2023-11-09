@@ -23,6 +23,11 @@ int main()
     //указать адрес post
     interactive(&post);
 
+
+    for (size_t i = 0; i < post->mail_count; i++)
+    {
+        free_mail(&(post->mails[i]));
+    }
     free(post->mails);
     free(post);
 
