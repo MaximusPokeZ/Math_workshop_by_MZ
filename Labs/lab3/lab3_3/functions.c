@@ -19,7 +19,8 @@ enum status_codes
     invalid_input,
     memory_allocation_problem,
     error_file_open,
-    error_fscanf
+    error_fscanf,
+    not_succes
 };
 
 
@@ -91,11 +92,38 @@ void print_employees_to_file(Employee * employees, int cnt, FILE * file)
     fprintf(file, "\n");
 }
 
+enum status_codes diff_file (const char * file1, const char * file2)
+{
+    int len1 = strlen(file1);
+    int len2 = strlen(file2);
+    int len = (len1 > len2) ? len1 : len2;
+    char * temp1 = (char *)malloc(sizeof(char) * (len * 100));
+    if (temp1 == NULL) return memory_allocation_problem;
+    char * temp2 = (char *)malloc(sizeof(char) * (len * 100));
+    if (temp2 == NULL) {free(temp1);return memory_allocation_problem;}
+    if (realpath(file1, temp1) == NULL || realpath(file2, temp2) == NULL)
+    {
+        free(temp1);
+        free(temp2);
+        return not_succes;
+    }
+
+    if (strcmp(temp1, temp2) == 0) 
+    {
+        free(temp1);
+        free(temp2);
+        return not_succes;
+    }
+    return success;
+
+}
+
 enum status_codes validate_params(int argc, char *argv[], FILE** file, FILE ** output, char *flag)
 {
     if ((argc != 4) || strlen(argv[2]) != 2) return invalid_input;
     if ((argv[2][0] != '/' && argv[2][0] != '-') || (argv[2][1] != 'd' && argv[2][1] != 'a')) return invalid_input;
     *flag = argv[2][1];
+    if (diff_file(argv[1], argv[3]) != success) return error_file_open;
     *file = fopen(argv[1], "r");
     if (*file == NULL) return error_file_open;
     *output = fopen(argv[3], "w");
