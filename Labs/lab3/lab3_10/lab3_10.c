@@ -137,7 +137,7 @@ void to_file (Node* root, FILE* file, int level)
 
 int main(int argc, char* argv[]) 
 {
-    if (argc < 3) 
+    if (argc != 3) 
     {
         printf("Usage: <%s> <input_file.txt> <output_file.txt>\n", argv[0]);
         return invalid_input;
