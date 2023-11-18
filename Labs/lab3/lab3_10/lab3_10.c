@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-#define BUFF_SIZE 128
+#define BUFF_SIZE 256
 
 
 enum status_codes
@@ -67,7 +68,7 @@ enum status_codes diff_file (const char * file1, const char * file2)
 
 typedef struct Node 
 {
-    char data;
+    char* data;
     struct Node** children;
     int child_count;
 } Node;
@@ -79,15 +80,18 @@ void free_node(Node *node)
         free_node(node->children[i]);
     }
     free(node->children);
+    free(node->data);
     free(node);
 }
 
 
-Node* new_node(char data) 
+Node* new_node(char* data) 
 {
     Node* new = (Node*)malloc(sizeof(Node));
     if (new == NULL) return NULL;
-    new->data = data;
+    new->data = (char *)malloc(sizeof(char) * strlen(data));
+    if (new->data == NULL) {free(new); return NULL;}
+    strcpy(new->data, data);
     new->children = NULL;
     new->child_count = 0;
     return new;
@@ -97,9 +101,19 @@ Node* build_tree (char* expression, int* index)
 {
     if (expression[*index] == '\0') return NULL;
 
-    Node* root = new_node(expression[*index]);
+    char buffer[BUFF_SIZE];
+    int buffer_index = 0;
+
+    while (expression[*index] != '\0' && expression[*index] != ' ' && expression[*index] != ',' && expression[*index] != '(' && expression[*index] != ')' && expression[*index] != '\n') 
+    {
+        buffer[buffer_index++] = expression[*index];
+        (*index)++;
+    }
+
+    buffer[buffer_index] = '\0';
+
+    Node* root = new_node(buffer);
     if (root == NULL) return NULL;
-    (*index)++;
 
     while (expression[*index] == ',' || expression[*index] == ' ') (*index)++;
 
@@ -109,8 +123,9 @@ Node* build_tree (char* expression, int* index)
         while (expression[*index] != ')') 
         {
             Node* child = build_tree(expression, index);
+            if (child == NULL) {free_node(root); return NULL;}
             Node ** p = (Node**)realloc(root->children, (root->child_count + 1) * sizeof(Node*));
-            if (p == NULL) {free_node(root); return NULL;}
+            if (p == NULL) {free_node(root); free_node(child); return NULL;}
             root->children = p;
             root->children[root->child_count] = child;
             root->child_count++;
@@ -127,7 +142,7 @@ void to_file (Node* root, FILE* file, int level)
 {
     if (root == NULL) return;
 
-    fprintf(file, "%*c%c\n", level * 2, ' ', root->data);
+    fprintf(file, "%*c%s\n", level * 2, ' ', root->data);
 
     for (int i = 0; i < root->child_count; i++) 
     {
@@ -168,21 +183,26 @@ int main(int argc, char* argv[])
         return error_file_open;
     }
 
-
-
     char line[BUFF_SIZE];
     while (fgets(line, sizeof(line), infile) != NULL) 
     {
         int index = 0;
+        while (line[index] == ' ' || line[index] == ',' || line[index] == '(') (index)++;
         Node* root = build_tree(line, &index);
         if (root == NULL) {print_status(invalid_input); continue;}
         to_file(root, outfile, 0);
-        fprintf(outfile, "\n");
         free_node(root);
+        while (line[index] != '\0' && line[index] != '\n' && line[index] != ')')
+        {
+            while (line[index] == ' ' || line[index] == ',' || line[index] == '(') (index)++;
+            root = build_tree(line, &index);
+            to_file(root, outfile, 0);
+            if (root != NULL) {free_node(root);}
+        }
+        fprintf(outfile, "-----------------------------------------------\n");
     }
 
     fclose(infile);
     fclose(outfile);
-
     return 0;
 }
