@@ -62,6 +62,8 @@ enum status_codes diff_file (const char * file1, const char * file2)
         free(temp2);
         return not_succes;
     }
+    free(temp1);
+    free(temp2);
     return success;
 }
 
@@ -89,7 +91,7 @@ Node* new_node(char* data)
 {
     Node* new = (Node*)malloc(sizeof(Node));
     if (new == NULL) return NULL;
-    new->data = (char *)malloc(sizeof(char) * strlen(data));
+    new->data = (char *)malloc(sizeof(char) * (strlen(data) + 1));
     if (new->data == NULL) {free(new); return NULL;}
     strcpy(new->data, data);
     new->children = NULL;
