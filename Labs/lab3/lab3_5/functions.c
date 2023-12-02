@@ -63,6 +63,8 @@ status_codes diff_file (const char * file1, const char * file2)
         free(temp2);
         return NOT_SUCCESS;
     }
+    free(temp1);
+    free(temp2);
     return SUCCESS;
 }
 
@@ -142,7 +144,7 @@ status_codes search_student(Student *students, int num_students, char choice, St
             fgets(buffer, sizeof(buffer), stdin);
             len = strlen(buffer) - 1;
             buffer[len] = '\0';
-            if (len == 0 || len > 6 || is_digits_only(buffer) || sscanf(buffer, "%u", &search_id) != 1)
+            if (len == 0 || len > 6 || !is_digits_only(buffer) || sscanf(buffer, "%u", &search_id) != 1)
             {
                 printf("Invalid input for ID.\n");
                 return INVALID_DATA;
