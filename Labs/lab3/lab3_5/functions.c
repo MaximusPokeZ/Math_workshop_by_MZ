@@ -199,7 +199,7 @@ status_codes search_student(Student *students, int num_students, char choice, St
             *crnt = student;
             found = 1;
             break;
-        }
+        } 
         else if (choice == 's' && strcmp(student->surname, buffer) == 0) 
         {
             *crnt = student;
