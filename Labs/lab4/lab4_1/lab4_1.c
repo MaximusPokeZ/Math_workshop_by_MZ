@@ -27,8 +27,7 @@ typedef struct Hash_table
     Node** table;
 } Hash_table;
 
-
-void print_status_codes (status_codes status) 
+void print_status_codes(status_codes status) 
 {
     switch (status) 
     {
@@ -40,15 +39,32 @@ void print_status_codes (status_codes status)
             break;
         case INPUT_ERROR:
             fprintf(stderr, "Input error\n");
-            break;   
+            break;
         default:
             fprintf(stderr, "Unknown error\n");
             break;
     }
 }
 
+void free_table(Hash_table* hashtable) 
+{
+    for (unsigned int i = 0; i < hashtable->size; i++) 
+    {
+        Node* current = hashtable->table[i];
+        while (current != NULL) 
+        {
+            Node* next = current->next;
+            free(current->key);
+            free(current->value);
+            free(current);
+            current = next;
+        }
+    }
+    free(hashtable->table);
+    free(hashtable);
+}
 
-Hash_table* create_hash_table (unsigned int size) 
+Hash_table* create_hash_table(unsigned int size) 
 {
     Hash_table* hashtable = (Hash_table*)malloc(sizeof(Hash_table));
     if (hashtable == NULL) return NULL;
@@ -74,37 +90,37 @@ unsigned int hash(Hash_table* hashtable, char* key)
     return hashval;
 }
 
-status_codes insert(struct Hash_table* hashtable, char* key, char* value) 
+status_codes insert(Hash_table* hashtable, char* key, char* value) 
 {
     size_t len1 = strlen(value);
     size_t len2 = strlen(key);
-    if (len1 > 0 && value[len1 - 1] == '\n') { value[len1 - 1] = '\0';}
+    if (len1 > 0 && value[len1 - 1] == '\n') { value[len1 - 1] = '\0'; }
 
     unsigned int index = hash(hashtable, key);
-    Node* new_node = (Node*)malloc(sizeof(struct Node));
+    Node* new_node = (Node*)malloc(sizeof(Node));
     if (new_node == NULL) return MEMORY_ALLOCATION_ERROR;
 
-    new_node->value = (char *)malloc(sizeof(char) * (len1 + 1));
-    if (new_node->value == NULL)
+    new_node->value = (char*)malloc(sizeof(char) * (len1 + 1));
+    if (new_node->value == NULL) 
     {
         free(new_node);
         return MEMORY_ALLOCATION_ERROR;
-    } 
+    }
     strcpy(new_node->value, value);
-    new_node->key = (char *)malloc(sizeof(char) * (len2 + 1)); 
-    if (new_node->key == NULL)
+    new_node->key = (char*)malloc(sizeof(char) * (len2 + 1));
+    if (new_node->key == NULL) 
     {
-        free(new_node->value); free(new_node);
+        free(new_node->value);
+        free(new_node);
         return MEMORY_ALLOCATION_ERROR;
     }
     strcpy(new_node->key, key);
-    new_node->next = hashtable->table[index]; //метод цепочек
+    new_node->next = hashtable->table[index];
     hashtable->table[index] = new_node;
     return SUCCESS;
 }
 
-
-void replace_substr (char* str, const char* old, const char* new) 
+void replace_substr(char* str, const char* old, const char* new) 
 {
     char* pos = strstr(str, old);
     if (pos != NULL) 
@@ -116,7 +132,69 @@ void replace_substr (char* str, const char* old, const char* new)
     }
 }
 
-enum status_codes parsing_file(Hash_table* hashtable, char* input_filename, char* output_filename) 
+void resize_hash_table(Hash_table** hashtable, unsigned int new_size) 
+{
+    Hash_table* new_table = create_hash_table(new_size);
+
+    for (unsigned int i = 0; i < (*hashtable)->size; i++) 
+    {
+        Node* current = (*hashtable)->table[i];
+        while (current != NULL) 
+        {
+            insert(new_table, current->key, current->value);
+            current = current->next;
+        }
+    }
+
+    free_table(*hashtable);
+
+    *hashtable = new_table;
+}
+
+status_codes insert_with_balancing(Hash_table** hashtable, char* key, char* value) 
+{
+    status_codes result = insert(*hashtable, key, value);
+
+    unsigned int min_length = -1;
+    unsigned int max_length = 0;
+
+    for (unsigned int i = 0; i < (*hashtable)->size; i++) 
+    {
+        Node* current = (*hashtable)->table[i];
+        unsigned int chain_length = 0;
+        while (current != NULL) 
+        {
+            chain_length++;
+            current = current->next;
+        }
+
+        if (chain_length > max_length) 
+        {
+            max_length = chain_length;
+        }
+
+        if (chain_length < min_length) 
+        {
+            min_length = chain_length;
+        }
+    }
+
+    if (max_length >= 2 * min_length) 
+    {
+        if ((*hashtable)->size < max_length) 
+        {
+            resize_hash_table(hashtable, (*hashtable)->size * 2);
+        } 
+        else if ((*hashtable)->size > 2 * min_length) 
+        {
+            resize_hash_table(hashtable, (*hashtable)->size / 2);
+        }
+    }
+
+    return result;
+}
+
+status_codes parsing_file(Hash_table** hashtable, char* input_filename, char* output_filename) 
 {
     FILE* input_file = fopen(input_filename, "r");
     if (input_file == NULL) return FILE_OPEN_ERROR;
@@ -129,21 +207,21 @@ enum status_codes parsing_file(Hash_table* hashtable, char* input_filename, char
     }
 
     char line[BUFFER_SIZE];
-    char * ptr = NULL;
+    char* ptr = NULL;
     while (fgets(line, sizeof(line), input_file) != NULL) 
     {
         ptr = strstr(line, "#define");
         if (ptr != NULL) 
         {
             char def_name[BUFFER_SIZE];
-            char value[BUFFER_SIZE]; 
+            char value[BUFFER_SIZE];
             if (sscanf(ptr, "#define %255s %255s[^\n]", def_name, value) == 2) 
             {
-                if (insert(hashtable, def_name, value) != SUCCESS)
+                if (insert_with_balancing(hashtable, def_name, value) != SUCCESS) 
                 {
-                    return MEMORY_ALLOCATION_ERROR;
                     fclose(input_file);
                     fclose(output_file);
+                    return MEMORY_ALLOCATION_ERROR;
                 }
             } 
             else 
@@ -153,9 +231,9 @@ enum status_codes parsing_file(Hash_table* hashtable, char* input_filename, char
         } 
         else 
         {
-            for (unsigned int i = 0; i < hashtable->size; i++) 
+            for (unsigned int i = 0; i < (*hashtable)->size; i++) 
             {
-                struct Node* current = hashtable->table[i];
+                Node* current = (*hashtable)->table[i];
                 while (current != NULL) 
                 {
                     replace_substr(line, current->key, current->value);
@@ -164,31 +242,12 @@ enum status_codes parsing_file(Hash_table* hashtable, char* input_filename, char
             }
         }
         fprintf(output_file, "%s", line);
-
     }
 
     fclose(input_file);
     fclose(output_file);
 
     return SUCCESS;
-}
-
-void free_table (Hash_table* hashtable) 
-{
-    for (unsigned int i = 0; i < hashtable->size; i++) 
-    {
-        Node* current = hashtable->table[i];
-        while (current != NULL)
-        {
-            Node* next = current->next;
-            free(current->key);
-            free(current->value);
-            free(current);
-            current = next;
-        }
-    }
-    free(hashtable->table);
-    free(hashtable);
 }
 
 int main(int argc, char* argv[]) 
@@ -199,17 +258,26 @@ int main(int argc, char* argv[])
         return INPUT_ERROR;
     }
 
-    struct Hash_table* hashtable = create_hash_table (INITIAL_HASHSIZE);
+    Hash_table* hashtable = create_hash_table(INITIAL_HASHSIZE);
     if (hashtable == NULL) 
     {
         print_status_codes(MEMORY_ALLOCATION_ERROR);
         return MEMORY_ALLOCATION_ERROR;
     }
 
-    enum status_codes status = parsing_file(hashtable, argv[1], argv[2]);
-    free_table (hashtable);
+    status_codes status = parsing_file(&hashtable, argv[1], argv[2]);
+    
+    
+    free_table(hashtable);
 
-    if (status != SUCCESS) {print_status_codes(status);}
-    else printf("OK!\n");
+    if (status != SUCCESS) 
+    {
+        print_status_codes(status);
+    } 
+    else 
+    {
+        printf("OK!\n");
+    }
+    
     return status;
 }
