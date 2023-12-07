@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BUFF_SIZE 1024
 #define INITIAL_HASHSIZE  128
 #define BUFFER_SIZE 256
 #define FOR_HASH 62
@@ -44,6 +45,35 @@ void print_status_codes(status_codes status)
             fprintf(stderr, "Unknown error\n");
             break;
     }
+}
+
+status_codes diff_file (const char * file1, const char * file2)
+{
+    int len1 = strlen(file1);
+    int len2 = strlen(file2);
+    int len = (len1 > len2) ? len1 : len2;
+
+    char * temp1 = (char *)malloc(sizeof(char) * (len * BUFF_SIZE));
+    if (temp1 == NULL) return MEMORY_ALLOCATION_ERROR;
+    char * temp2 = (char *)malloc(sizeof(char) * (len * BUFF_SIZE));
+    if (temp2 == NULL) {free(temp1);return MEMORY_ALLOCATION_ERROR;}
+
+    if (realpath(file1, temp1) == NULL || realpath(file2, temp2) == NULL)
+    {
+        free(temp1);
+        free(temp2);
+        return FILE_OPEN_ERROR;
+    }
+
+    if (strcmp(temp1, temp2) == 0) 
+    {
+        free(temp1);
+        free(temp2);
+        return FILE_OPEN_ERROR;
+    }
+    free(temp1);
+    free(temp2);
+    return SUCCESS;
 }
 
 void free_table(Hash_table* hashtable) 
@@ -120,16 +150,32 @@ status_codes insert(Hash_table* hashtable, char* key, char* value)
     return SUCCESS;
 }
 
-void replace_substr(char* str, const char* old, const char* new) 
+status_codes replace_substr(char** str, ssize_t* buffer_size, const char* old, const char* new) 
 {
-    char* pos = strstr(str, old);
-    if (pos != NULL) 
+    char* pos = strstr(*str, old);
+    while (pos != NULL) 
     {
         size_t len1 = strlen(new);
         size_t len2 = strlen(old);
-        memmove(pos + len1, pos + len2, strlen(pos + len2) + 1);
-        memcpy(pos, new, strlen(new));
+
+        if (len1 > len2) 
+        {
+            size_t new_size = *buffer_size + len1 - len2 + 1;  
+            *str = realloc(*str, new_size);
+            if (*str == NULL) 
+            {
+                return MEMORY_ALLOCATION_ERROR;
+            }
+            *buffer_size = new_size;
+            pos = strstr(*str, old);  
+        }
+
+        size_t remaining_len = strlen(pos + len2) + 1;
+        memmove(pos + len1, pos + len2, remaining_len);       
+        memcpy(pos, new, len1);
+        pos = strstr(pos + len1, old); 
     }
+    return SUCCESS;
 }
 
 void resize_hash_table(Hash_table** hashtable, unsigned int new_size) 
@@ -196,6 +242,10 @@ status_codes insert_with_balancing(Hash_table** hashtable, char* key, char* valu
 
 status_codes parsing_file(Hash_table** hashtable, char* input_filename, char* output_filename) 
 {
+    if (diff_file(input_filename, output_filename) != SUCCESS)
+    {
+        return FILE_OPEN_ERROR;
+    }
     FILE* input_file = fopen(input_filename, "r");
     if (input_file == NULL) return FILE_OPEN_ERROR;
 
@@ -206,21 +256,24 @@ status_codes parsing_file(Hash_table** hashtable, char* input_filename, char* ou
         return FILE_OPEN_ERROR;
     }
 
-    char line[BUFFER_SIZE];
-    char* ptr = NULL;
-    while (fgets(line, sizeof(line), input_file) != NULL) 
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    while ((read = getline(&line, &len, input_file)) != -1) 
     {
-        ptr = strstr(line, "#define");
+        char* ptr = strstr(line, "#define");
         if (ptr != NULL) 
         {
-            char def_name[BUFFER_SIZE];
-            char value[BUFFER_SIZE];
-            if (sscanf(ptr, "#define %255s %255s[^\n]", def_name, value) == 2) 
+            char def_name[read];
+            char value[read];
+            if (sscanf(ptr, "#define %255s %255[^\n]", def_name, value) == 2) 
             {
                 if (insert_with_balancing(hashtable, def_name, value) != SUCCESS) 
                 {
                     fclose(input_file);
                     fclose(output_file);
+                    free(line);
                     return MEMORY_ALLOCATION_ERROR;
                 }
             } 
@@ -236,16 +289,25 @@ status_codes parsing_file(Hash_table** hashtable, char* input_filename, char* ou
                 Node* current = (*hashtable)->table[i];
                 while (current != NULL) 
                 {
-                    replace_substr(line, current->key, current->value);
+                    if (replace_substr(&line, &read, current->key, current->value) != SUCCESS)
+                    {
+                        free(line);
+                        fclose(input_file);
+                        fclose(output_file);
+                        return MEMORY_ALLOCATION_ERROR;
+                    }
                     current = current->next;
                 }
             }
+
         }
         fprintf(output_file, "%s", line);
     }
+    free(line);
 
     fclose(input_file);
     fclose(output_file);
+
 
     return SUCCESS;
 }

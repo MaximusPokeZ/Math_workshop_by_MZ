@@ -6,6 +6,8 @@
 #define             TINGGREE    "HI!"
 #define      PI            3.14
 
+#define A zzz
+
 int main() 
 {
     char message[10] = "Hello";
@@ -15,6 +17,8 @@ int main()
     char message1[10] = "HI!";
     printf("%s\n", message);
     printf("Circle area: %f\n", area);
+
+    int a = zzz + zzz + zzz + zzz + C + D;
 
     return 0;
 }
