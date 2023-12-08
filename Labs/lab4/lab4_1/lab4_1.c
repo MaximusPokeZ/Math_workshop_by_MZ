@@ -160,12 +160,14 @@ status_codes replace_substr(char** str, ssize_t* buffer_size, const char* old, c
 
         if (len1 > len2) 
         {
-            size_t new_size = *buffer_size + len1 - len2 + 1;  
-            *str = realloc(*str, new_size);
-            if (*str == NULL) 
+            size_t new_size = *buffer_size + len1 - len2 + 1;
+            char * ptr = NULL;  
+            ptr = (char*)realloc(*str, new_size);
+            if (ptr == NULL) 
             {
                 return MEMORY_ALLOCATION_ERROR;
             }
+            *str = ptr;
             *buffer_size = new_size;
             pos = strstr(*str, old);  
         }
