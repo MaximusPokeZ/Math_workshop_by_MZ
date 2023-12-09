@@ -244,19 +244,19 @@ status_codes insert_with_balancing(Hash_table** hashtable, char* key, char* valu
 
 status_codes parsing_file(Hash_table** hashtable, char* input_filename, char* output_filename) 
 {
+    FILE* output_file = fopen(output_filename, "w");
+    if (output_file == NULL) 
+    {
+        return FILE_OPEN_ERROR;
+    }
     if (diff_file(input_filename, output_filename) != SUCCESS)
     {
         return FILE_OPEN_ERROR;
     }
     FILE* input_file = fopen(input_filename, "r");
-    if (input_file == NULL) return FILE_OPEN_ERROR;
+    if (input_file == NULL) {return FILE_OPEN_ERROR; fclose(output_file);}
 
-    FILE* output_file = fopen(output_filename, "w");
-    if (output_file == NULL) 
-    {
-        fclose(input_file);
-        return FILE_OPEN_ERROR;
-    }
+
 
     char* line = NULL;
     size_t len = 0;
