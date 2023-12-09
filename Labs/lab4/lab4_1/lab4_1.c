@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #define BUFF_SIZE 1024
 #define INITIAL_HASHSIZE  128
@@ -112,11 +113,33 @@ Hash_table* create_hash_table(unsigned int size)
 unsigned int hash(Hash_table* hashtable, char* key) 
 {
     unsigned int hashval = 0;
-    while (*key) 
+
+    int base = 62;
+
+    int len = (int)strlen(key);
+    for(int i = len-1; i >= 0; i--)
     {
-        hashval = (hashval * FOR_HASH + *key) % hashtable->size;
-        key++;
+        int value;
+        if(key[i] >= 'a' && key[i] <= 'z')
+        {
+            value = key[i] - 'a' + 10;
+        }
+        else if(key[i] >= 'A' && key[i] <= 'Z')
+        {
+            value = key[i] - 'A' + 36;
+        }
+        else if(key[i] >= '0' && key[i] <= '9')
+        {
+            value = key[i] - '0';
+        }
+        if((ULLONG_MAX - hashval) / base < value)
+        {
+            return 0;
+        }
+        hashval = hashval * base + value;
     }
+
+    hashval = hashval % hashtable->size;
     return hashval;
 }
 
