@@ -180,6 +180,7 @@ enum status_codes interact(Node ** head, Undo_stack ** stack, int * modification
 
     while (1) 
     {
+        choice = 0;
         printf("\nMenu:\n");
         printf("1. Print residents\n");
         printf("2. Search resident\n");
@@ -306,6 +307,7 @@ int main()
     FILE* file = fopen(filename, "r");
     if (file == NULL) 
     {
+        free_undo_stack(stack);
         printf("Error opening file\n");
         return file_open_error;
     }
@@ -343,7 +345,7 @@ int main()
         if (validate_data(liver)) 
         {
             Node * new = create_node(liver);
-            if (new == NULL) {free_list(head); return memory_allocation_problem;}
+            if (new == NULL) {free_list(head); free_undo_stack(stack); return memory_allocation_problem;}
             insert_Node(&head, new);
         } 
         else

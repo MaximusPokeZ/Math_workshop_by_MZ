@@ -125,7 +125,7 @@ status_codes build_tree_from_file(Tree *tree, const char *filename, const char *
     free(buffer);
     fclose(file);
     qsort(nodes->nodes, nodes->size, sizeof(Node *), compare_nodes_by_occurrences);
-    return SUCCESS;
+    return SUCCESS; 
 }
 
 status_codes load_tree_from_file_r(FILE *file, Tree *tree, Nodes_info *nodes)
