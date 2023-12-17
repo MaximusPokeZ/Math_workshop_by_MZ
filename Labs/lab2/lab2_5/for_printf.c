@@ -240,9 +240,8 @@ int process_user_flags(const char* format, va_list* ptr, char* result_buffer, si
 
 int overfprintf(FILE* stream, const char* format, ...) 
 {
-    va_list ptr, ptr_c;
+    va_list ptr;
     va_start(ptr, format);
-    va_copy(ptr_c, ptr);
     
 
     char result_buffer[STRING_SIZE];
