@@ -4,53 +4,59 @@
 
 status_codes diff_file(const char *file1, const char *file2)
 {
-    int len1 = strlen(file1);
-    int len2 = strlen(file2);
-    int len = (len1 > len2) ? len1 : len2;
+    char *temp1 = NULL;
+    char *temp2 = NULL;
 
-    char *temp1 = (char *)malloc(sizeof(char) * (len * PATH_MAX));
-    if (temp1 == NULL)
-        return STATUS_ERROR_MEMORY_ALLOCATION;
-    char *temp2 = (char *)malloc(sizeof(char) * (len * PATH_MAX));
-    if (temp2 == NULL)
+    size_t max_path_len = PATH_MAX; 
+    temp1 = (char *)malloc(sizeof(char) * max_path_len);
+    temp2 = (char *)malloc(sizeof(char) * max_path_len);
+
+    if (temp1 == NULL || temp2 == NULL)
     {
         free(temp1);
+        free(temp2);
         return STATUS_ERROR_MEMORY_ALLOCATION;
     }
 
-    if (realpath(file1, temp1) == NULL && realpath(file2, temp2) == NULL)
+    if (realpath(file1, temp1) == NULL || realpath(file2, temp2) == NULL)
     {
         free(temp1);
         free(temp2);
         return STATUS_ERROR_FILE_SAME;
     }
 
-    if (strcmp(temp1, temp2) == 0)
-    {
-        free(temp1);
-        free(temp2);
-        return STATUS_ERROR_FILE_SAME;
-    }
+    int cmp_result = strcmp(temp1, temp2);
+
     free(temp1);
     free(temp2);
-    return STATUS_OK;
+
+    if (cmp_result == 0)
+        return STATUS_ERROR_FILE_SAME;
+    else
+        return STATUS_OK;
 }
 
-status_codes create_init_array(Array **arr, char name, int initial_capacity)
+
+status_codes create_init_array(Array **arr, char name, int capacity)
 {
+    if (capacity <= 0)
+        return STATUS_ERROR_INVALID_COMMAND;
+
     *arr = (Array *)malloc(sizeof(Array));
     if (*arr == NULL)
         return STATUS_ERROR_MEMORY_ALLOCATION;
 
-    (*arr)->name = toupper(name);
-    (*arr)->length = 0;
-    (*arr)->capacity = initial_capacity;
-    (*arr)->data = (int *)malloc(initial_capacity * sizeof(int));
+    (*arr)->data = (int *)malloc(capacity * sizeof(int));
     if ((*arr)->data == NULL)
     {
         free(*arr);
         return STATUS_ERROR_MEMORY_ALLOCATION;
     }
+
+    (*arr)->name = name;
+    (*arr)->length = 0;
+    (*arr)->capacity = capacity;
+
     return STATUS_OK;
 }
 
@@ -67,7 +73,7 @@ status_codes free_array(Array **arr)
 
 void clear_all_arrays(Array *array_storage[], size_t array_storage_size)
 {
-    for (size_t i = 0; i < array_storage_size; ++i)
+    for (size_t i = 0; i <= array_storage_size; i++)
     {
         if (array_storage[i] != NULL)
         {

@@ -14,7 +14,7 @@
                          
                           ;
 
-    Print a all;
+    Print a all     ;
 
             Save A out.txt; 
              
