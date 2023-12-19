@@ -53,7 +53,7 @@ status_codes create_init_array(Array **arr, char name, int capacity)
         return STATUS_ERROR_MEMORY_ALLOCATION;
     }
 
-    (*arr)->name = name;
+    (*arr)->name = toupper(name);
     (*arr)->length = 0;
     (*arr)->capacity = capacity;
 
@@ -68,12 +68,14 @@ status_codes free_array(Array **arr)
     (*arr)->data = NULL;
     (*arr)->length = 0;
     (*arr)->capacity = 0;
+    free(*arr);
+    *arr = NULL;
     return STATUS_OK;
 }
 
 void clear_all_arrays(Array *array_storage[], size_t array_storage_size)
 {
-    for (size_t i = 0; i <= array_storage_size; i++)
+    for (size_t i = 0; i < array_storage_size; i++)
     {
         if (array_storage[i] != NULL)
         {
@@ -512,12 +514,13 @@ status_codes parsing(const char *filename_pars)
             {
                 fclose(file);
                 free(buffer);
+                clear_all_arrays(array_storage, 26);
                 return STATUS_ERROR_MEMORY_ALLOCATION;
             }
             buffer = tmp;
         }
 
-        buffer[buffer_index++] = c;
+        buffer[buffer_index++] = tolower(c);
 
         if (c == ';')
         {
@@ -527,19 +530,20 @@ status_codes parsing(const char *filename_pars)
             char *command = strtok(buffer, " (\n\t");
             if (command == NULL)
             {
-                print_status(STATUS_ERROR_INVALID_COMMAND);
                 fclose(file);
                 free(buffer);
+                clear_all_arrays(array_storage, 26);
                 return STATUS_ERROR_INVALID_COMMAND;
             }
 
-            if (strcmp(command, "Load") == 0)
+            if (strcmp(command, "load") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
                 {
                     fclose(file);
                     free(buffer);
+                    clear_all_arrays(array_storage, 26);
                     return STATUS_ERROR_INVALID_COMMAND;
                 }
 
@@ -548,20 +552,23 @@ status_codes parsing(const char *filename_pars)
                 {
                     fclose(file);
                     free(buffer);
+                    clear_all_arrays(array_storage, 26);
                     return STATUS_ERROR_FILE_OPEN;
                 }
 
                 if (strtok(NULL, " ,;\n\t()") != NULL)
+                {
+                    fclose(file);
+                    free(buffer);
+                    clear_all_arrays(array_storage, 26);
                     return STATUS_ERROR_INVALID_COMMAND;
+                }
 
                 Array *arr = NULL;
                 int index = toupper(*array_name) - 'A';
                 if (array_storage[index] != NULL)
                 {
-                    fclose(file);
-                    free(buffer);
-                    clear_all_arrays(array_storage, 26);
-                    return STATUS_ERROR_ARRAY_EXISTED;
+                    free_array(&array_storage[index]);
                 }
                 if ((status = create_init_array(&arr, *array_name, MIN_FOR_ARRAY)) != STATUS_OK)
                 {
@@ -579,7 +586,7 @@ status_codes parsing(const char *filename_pars)
                     return status;
                 }
             }
-            else if (strcmp(command, "Save") == 0)
+            else if (strcmp(command, "save") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
@@ -626,7 +633,7 @@ status_codes parsing(const char *filename_pars)
                     return status;
                 }
             }
-            else if (strcmp(command, "Rand") == 0)
+            else if (strcmp(command, "rand") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
@@ -694,7 +701,7 @@ status_codes parsing(const char *filename_pars)
                     return status;
                 }
             }
-            else if (strcmp(command, "Concat") == 0)
+            else if (strcmp(command, "concat") == 0)
             {
                 char *array_name_a = strtok(NULL, ", \n\t");
                 if (array_name_a == NULL || strlen(array_name_a) != 1 || !isalpha(*array_name_a))
@@ -742,7 +749,7 @@ status_codes parsing(const char *filename_pars)
                     return status;
                 }
             }
-            else if (strcmp(command, "Free") == 0)
+            else if (strcmp(command, "free") == 0)
             {
                 char *array_name = strtok(NULL, ", )\n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
@@ -772,7 +779,7 @@ status_codes parsing(const char *filename_pars)
                 }
                 free_array(&array_storage[index]);
             }
-            else if (strcmp(command, "Remove") == 0)
+            else if (strcmp(command, "remove") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
@@ -825,7 +832,7 @@ status_codes parsing(const char *filename_pars)
                     return status_remove;
                 }
             }
-            else if (strcmp(command, "Copy") == 0)
+            else if (strcmp(command, "copy") == 0)
             {
                 char *source_name = strtok(NULL, ", \n\t");
                 if (source_name == NULL || strlen(source_name) != 1 || !isalpha(*source_name))
@@ -880,7 +887,7 @@ status_codes parsing(const char *filename_pars)
                     return status_copy;
                 }
             }
-            else if (strcmp(command, "Sort") == 0)
+            else if (strcmp(command, "sort") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 char *order_str = strtok(NULL, " ;\n\t");
@@ -903,7 +910,7 @@ status_codes parsing(const char *filename_pars)
                     return STATUS_ERROR_ARRAY_NOT_EXISTED;
                 }
 
-                if (strlen(order_str) != 1 || order_str[0] != '+' || order_str[0] != '-')
+                if (strlen(order_str) != 1 || (order_str[0] != '+' && order_str[0] != '-'))
                 {
                     fclose(file);
                     free(buffer);
@@ -921,7 +928,7 @@ status_codes parsing(const char *filename_pars)
                     return status_sort;
                 }
             }
-            else if (strcmp(command, "Shuffle") == 0)
+            else if (strcmp(command, "shuffle") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
 
@@ -951,7 +958,7 @@ status_codes parsing(const char *filename_pars)
                     return STATUS_ERROR_EMPTY_ARRAY;
                 }
             }
-            else if (strcmp(command, "Stats") == 0)
+            else if (strcmp(command, "stats") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t;");
 
@@ -975,7 +982,7 @@ status_codes parsing(const char *filename_pars)
 
                 print_stats(array_storage[index]);
             }
-            else if (strcmp(command, "Print") == 0)
+            else if (strcmp(command, "print") == 0)
             {
                 char *array_name = strtok(NULL, ", \n\t");
                 if (array_name == NULL || strlen(array_name) != 1 || !isalpha(*array_name))
@@ -1008,10 +1015,15 @@ status_codes parsing(const char *filename_pars)
                 int start = 0, end = 0;
                 char *next2 = strtok(NULL, ", \n\t;");
 
-                if (strcmp(next, "all") == 0)
+                if (strcmp(next, "all") == 0 && next2 == NULL)
                 {
                     if (print_all(array_storage[index]) != STATUS_OK)
+                    {
+                        fclose(file);
+                        free(buffer);
+                        clear_all_arrays(array_storage, 26);
                         return STATUS_ERROR_EMPTY_ARRAY;
+                    }                
                 }
                 else if (next2 == NULL)
                 {
@@ -1026,7 +1038,13 @@ status_codes parsing(const char *filename_pars)
                     }
                     status = print_single_element(array_storage[index], crnt_indx);
                     if (status != STATUS_OK)
+                    {
+                        fclose(file);
+                        free(buffer);
+                        clear_all_arrays(array_storage, 26);
                         return status;
+                    }
+                        
                 }
                 else
                 {
@@ -1043,7 +1061,12 @@ status_codes parsing(const char *filename_pars)
 
                     status_end = print_range(array_storage[index], start, end);
                     if (status_end != STATUS_OK)
+                    {
+                        fclose(file);
+                        free(buffer);
+                        clear_all_arrays(array_storage, 26);
                         return status_end;
+                    }
                 }
             }
 
@@ -1059,9 +1082,16 @@ status_codes parsing(const char *filename_pars)
     return STATUS_OK;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    status_codes status = parsing("file.txt");
+    if (argc != 2)
+    {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return STATUS_ERROR_INVALID_COMMAND;
+    }
+
+    const char *filename = argv[1];
+    status_codes status = parsing(filename);
 
     if (status != STATUS_OK)
     {
