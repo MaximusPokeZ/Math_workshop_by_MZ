@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
+#include <math.h>
 #define STR_SIZE 256
 
 typedef enum 
@@ -12,11 +13,14 @@ typedef enum
     STATUS_ERROR_FILE_OPEN,
     STATUS_ERROR_FILE_WRITE,
     STATUS_ERROR_FILE_READ,
+    STATUS_ERROR_FILE_SAME,
     STATUS_ERROR_MEMORY_ALLOCATION,
     STATUS_ERROR_INVALID_COMMAND,
     STATUS_ERROR_INVALID_INDEX,
     STATUS_ERROR_INVALID_RANGE,
     STATUS_ERROR_EMPTY_ARRAY,
+    STATUS_ERROR_ARRAY_NOT_EXISTED,
+    STATUS_ERROR_ARRAY_EXISTED,
     STATUS_ERROR_INT_OVERFLOW,
     STATUS_ERROR_INVALID_FORMAT
 } status_codes;
@@ -37,6 +41,9 @@ void print_status(status_codes status)
         case STATUS_ERROR_FILE_READ:
             fprintf(stderr, "Error: Unable to read the file.\n");
             break;
+        case STATUS_ERROR_FILE_SAME:
+            fprintf(stderr, "Error: Files are the same.\n");
+            break;
         case STATUS_ERROR_MEMORY_ALLOCATION:
             fprintf(stderr, "Error: Unable to allocate memory.\n");
             break;
@@ -52,6 +59,12 @@ void print_status(status_codes status)
         case STATUS_ERROR_EMPTY_ARRAY:
             fprintf(stderr, "Error: The array is empty.\n");
             break;
+        case STATUS_ERROR_ARRAY_NOT_EXISTED:
+            fprintf(stderr, "Error: The array does not exist.\n");
+            break;
+        case STATUS_ERROR_ARRAY_EXISTED:
+            fprintf(stderr, "Error: The array already exists.\n");
+            break;
         case STATUS_ERROR_INT_OVERFLOW:
             fprintf(stderr, "Error: Integer overflow.\n");
             break;
@@ -64,13 +77,6 @@ void print_status(status_codes status)
     }
 }
 
-typedef enum status_cmd {
-    cmd_exit,
-    cmd_error_alloc,
-    cmd_invalid_parameter,
-    cmd_error_oppening,
-    cmd_success
-} status_cmd;
 
 typedef struct Array {
     char name;
