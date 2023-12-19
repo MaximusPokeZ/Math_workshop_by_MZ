@@ -18,13 +18,8 @@ status_codes diff_file(const char *file1, const char *file2)
         return STATUS_ERROR_MEMORY_ALLOCATION;
     }
 
-    if (realpath(file1, temp1) == NULL || realpath(file2, temp2) == NULL)
-    {
-        free(temp1);
-        free(temp2);
-        return STATUS_ERROR_FILE_SAME;
-    }
-
+    realpath(file1, temp1);
+    realpath(file2, temp2);
     int cmp_result = strcmp(temp1, temp2);
 
     free(temp1);

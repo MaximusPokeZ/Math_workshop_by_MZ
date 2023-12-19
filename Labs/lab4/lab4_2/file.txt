@@ -20,7 +20,7 @@ Print A 1;
 Print A 1 4;
 
 
-            Save A out.txt; 
+            Save A ppp.txt; 
              
              Rand    A 5    2 7     ;  
     Print A all ;; Load A kkk.txt; Print A all;         
